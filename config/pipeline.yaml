@@ -1,0 +1,36 @@
+# NOTE: More examples can be found in the `interfaces/ros1/wavemap_ros/config`
+#       directory, and all available params are documented at:
+#       https://ethz-asl.github.io/wavemap/pages/parameters
+
+map:
+  type: hashed_chunked_wavelet_octree
+  min_cell_width: { meters: 0.1 }
+
+map_operations:
+  - type: threshold_map
+    once_every: { seconds: 5.0 }
+  - type: prune_map
+    once_every: { seconds: 10.0 }
+  - type: crop_map
+    once_every: { seconds: 3.0 }
+    remove_blocks_beyond_distance: { meters: 10.0 }
+
+measurement_integrators:
+  your_camera:
+    projection_model:
+      type: pinhole_camera_projector
+      width: 640
+      height: 480
+      fx: 387.2292480468
+      fy: 387.2292480468
+      cx: 320.0
+      cy: 240.0
+    measurement_model:
+      type: continuous_ray
+      range_sigma: { meters: 0.05 }
+      scaling_free: 0.3
+      scaling_occupied: 0.6
+    integration_method:
+      type: hashed_chunked_wavelet_integrator
+      min_range: { meters: 0.5 }
+      max_range: { meters: 8.0 }
