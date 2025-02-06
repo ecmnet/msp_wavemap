@@ -34,25 +34,25 @@ measurement_integrators:
     integration_method:
       type: hashed_wavelet_integrator
       min_range: { meters: 0.3 }
-      max_range: { meters: 8.0 }
+      max_range: { meters: 12.0 }
       max_update_resolution: { meters: 0.1 }
 
-  gazebo_long:
-    projection_model:
-      type: pinhole_camera_projector
-      width: 640
-      height: 480
-      fx: 387.2292480468
-      fy: 387.2292480468
-      cx: 320.0
-      cy: 240.0
-    measurement_model:
-      type: continuous_ray
-      range_sigma: { meters: 0.4 }
-      scaling_free: 0.3
-      scaling_occupied: 0.6
-    integration_method:
-      type: hashed_wavelet_integrator
-      min_range: { meters: 8.0 }
-      max_range: { meters: 15.0 }
-      max_update_resolution: { meters: 0.4 }
+#  gazebo_long:
+#    projection_model:
+#      type: pinhole_camera_projector
+#      width: 640
+#      height: 480
+#      fx: 387.2292480468
+#      fy: 387.2292480468
+#      cx: 320.0
+#      cy: 240.0
+#    measurement_model:
+#      type: continuous_ray
+#      range_sigma: { meters: 0.1 }
+#      scaling_free: 0.3
+#      scaling_occupied: 0.6
+#    integration_method:
+#      type: hashed_wavelet_integrator
+#      min_range: { meters: 10.0 }
+#      max_range: { meters: 20.0 }
+#      max_update_resolution: { meters: 0.5 }

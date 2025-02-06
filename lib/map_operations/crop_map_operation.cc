@@ -14,7 +14,8 @@
 namespace wavemap {
 DECLARE_CONFIG_MEMBERS(CropMapOperationConfig,
                       (once_every)
-                      (remove_blocks_beyond_distance));
+                      (remove_blocks_beyond_distance)
+                      (only_when_moved));
 
 bool CropMapOperationConfig::isValid(bool verbose) const {
   bool all_valid = true;
@@ -29,10 +30,15 @@ CropMapOperation::CropMapOperation(const CropMapOperationConfig& config,
                                    MapBase::Ptr occupancy_map, Point3D* pos)
     : MapOperationBase(std::move(occupancy_map)),
       config_(config.checkValid()
-    ) { pos_ = pos; }
+    ) { pos_ = pos; last_pos_ = *pos; }
 
 bool CropMapOperation::shouldRun(const uint64_t current_time) {
-  return config_.once_every != 0 &&
+  if(config_.only_when_moved < 0)
+    return false;
+  return  ( 
+            config_.only_when_moved == 0 || 
+            ( (*pos_ - last_pos_).norm() > config_.only_when_moved ) 
+          ) &&
     config_.once_every < (current_time - last_run_timestamp_);
 }
 
@@ -42,12 +48,12 @@ void CropMapOperation::run(bool force_run) {
     return;
   }
   last_run_timestamp_ = current_time;
+  last_pos_ = *pos_;
 
   // If the map is empty, there's no work to do
   if (occupancy_map_->empty()) {
     return;
   }
-
 
   const IndexElement tree_height = occupancy_map_->getTreeHeight();
   const FloatingPoint min_cell_width = occupancy_map_->getMinCellWidth();

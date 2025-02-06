@@ -108,20 +108,12 @@ void MSWaveMapNode::initialize()
 
   map_publisher.setMap(occupancy_map_);
 
-  // Point3D p = Point3D(1.0f,1.0f,1.0f);
-  // Index3D index = wavemap::convert::pointToNearestIndex(p,10.0f);
-  // occupancy_map_->setCellValue(index,0.8f);
-
-  // p = Point3D(0.0f,0.0f,0.0f);
-  // index = wavemap::convert::pointToNearestIndex(p,10.0f);
-  // occupancy_map_->setCellValue(index,0.8f);
-
   RCLCPP_INFO(this->get_logger(), "MSP WaveMap Node started");
 }
 
 void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 {
-  if (++count % 5 != 0)
+  if (++count % 3 != 0)
     return;
 
   cv::Mat floatImg = cv::Mat(msg.height(), msg.width(), CV_32FC1, (void *)msg.data().data());
@@ -130,10 +122,13 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
   PosedImage<> depth_image(floatImg.rows, floatImg.cols);
   cv::cv2eigen<FloatingPoint>(floatImg, depth_image.getData());
   depth_image.setPose(T_W_C);
-  // auto t1 = std::chrono::high_resolution_clock::now();
-  pipeline_->runPipeline({"your_camera"}, PosedImage<>{T_W_C, depth_image});
-  // auto t2 = std::chrono::high_resolution_clock::now();
-  // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n\n";
+
+
+  auto t1 = std::chrono::high_resolution_clock::now();
+  pipeline_->runPipeline({"gazebo_short","gazebo_long"}, PosedImage<>{T_W_C, depth_image});
+  auto t2 = std::chrono::high_resolution_clock::now();
+  std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
+
   // const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
   // std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
 }

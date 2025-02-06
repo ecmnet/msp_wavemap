@@ -31,11 +31,10 @@ namespace msp
     explicit MSWaveMapNode() : msp::MSPNodeBase("MSWaveMapNode", MSP_COMP_AVOID)
     {
 
-      cam2body_ <<
-        0.0, 0.0, 1.0, 0.0,
-       -1.0, 0.0, 0.0, 0.0,
-        0.0,-1.0, 0.0,-0.02,
-        0.0, 0.0, 0.0, 1.0;
+      cam2body_ << 0.0, 0.0, 1.0, 0.0,
+          -1.0, 0.0, 0.0, 0.0,
+          0.0, -1.0, 0.0, -0.02,
+          0.0, 0.0, 0.0, 1.0;
 
       gz_node = std::make_unique<gz::transport::Node>();
 
@@ -46,31 +45,29 @@ namespace msp
       attitude_subscription = this->create_subscription<px4_msgs::msg::VehicleAttitude>(
           "/msp/out/vehicle_attitude", this->getQos(), [this](const px4_msgs::msg::VehicleAttitude::UniquePtr msg)
           {
-            Eigen::Quaternion<float> quaternion( msg->q[0], // w
-                                                 msg->q[1], // x
-                                                 msg->q[2], // y
+            Eigen::Quaternion<float> quaternion(msg->q[0], // w
+                                                -msg->q[1], // x
+                                                -msg->q[2], // y
                                                  msg->q[3]  // z
             );
-          //  quaternion.normalize();
+            //  quaternion.normalize();
             Eigen::Matrix3f body_r_m = quaternion.toRotationMatrix();
             Eigen::Matrix4f body2world;
             body2world.block<3, 3>(0, 0) = body_r_m;
-            body2world(0, 3) =  pos_[0];
-            body2world(1, 3) =  pos_[1];
-            body2world(2, 3) =  pos_[2];
+            body2world(0, 3) = pos_[0];
+            body2world(1, 3) = pos_[1];
+            body2world(2, 3) = pos_[2];
             body2world(3, 3) = 1.0;
 
             Eigen::Matrix4f cam_T = body2world * cam2body_;
             Eigen::Quaternionf q(cam_T.block<3, 3>(0, 0));
 
             T_W_C.getRotation() = Rotation3D(q);
-            T_W_C.getPosition() << cam_T(0, 3), cam_T(1, 3), cam_T(2, 3);
-
-          });
+            T_W_C.getPosition() << cam_T(0, 3), cam_T(1, 3), cam_T(2, 3); });
 
       local_pos_subscription = this->create_subscription<px4_msgs::msg::VehicleLocalPosition>(
           "/msp/out/vehicle_local_position", this->getQos(), [this](const px4_msgs::msg::VehicleLocalPosition::UniquePtr msg)
-          {  pos_ << msg->y, msg->x, -msg->z; });
+          { pos_ << msg->x, msg->y, -msg->z; });
 
       initialize();
     }
@@ -91,9 +88,9 @@ namespace msp
 
     Transformation3D T_W_C{};
 
-    Eigen::Vector3f   pos_ = Eigen::Vector3f(0.0f,0.0f,0.0f );
-    Eigen::Matrix4f   cam2body_;
-    
+    Eigen::Vector3f pos_ = Eigen::Vector3f(0.0f, 0.0f, 0.0f);
+    Eigen::Matrix4f cam2body_;
+
     cv::Mat image;
 
     int count;

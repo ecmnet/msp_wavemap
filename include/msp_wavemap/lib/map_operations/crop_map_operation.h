@@ -13,12 +13,15 @@ namespace wavemap {
 /**
  * Config struct for map cropping operations.
  */
-struct CropMapOperationConfig : public ConfigBase<CropMapOperationConfig, 2> {
+struct CropMapOperationConfig : public ConfigBase<CropMapOperationConfig, 3> {
   //! Time period controlling how often the map is cropped.
   Seconds<FloatingPoint> once_every = 10.f;
 
   //! Distance beyond which blocks are deleted when the cropper is executed.
   Meters<FloatingPoint> remove_blocks_beyond_distance;
+
+  //! Distance beyond which blocks are deleted when the cropper is executed.
+  Meters<FloatingPoint> only_when_moved;
 
   static MemberMap memberMap;
 
@@ -37,7 +40,8 @@ class CropMapOperation : public MapOperationBase {
  private:
 
   const CropMapOperationConfig config_;
-  Point3D* pos_;
+  Point3D  *pos_;
+  Point3D  last_pos_;
   uint64_t last_run_timestamp_;
 };
 }  // namespace wavemap
