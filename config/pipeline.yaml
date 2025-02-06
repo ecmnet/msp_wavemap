@@ -14,18 +14,18 @@ map_operations:
   - type: crop_map
     once_every: { seconds: 0.1 }
     remove_blocks_beyond_distance: { meters: 7.0 }
-    only_when_moved: { meters: 5.0 }
+    only_when_moved: { meters: 0.3 }
 
 measurement_integrators:
   gazebo_short:
     projection_model:
       type: pinhole_camera_projector
       width: 640
-      height: 480
-      fx: 387.2292480468
-      fy: 387.2292480468
+      height: 360
+      fx: 432.50
+      fy: 270.31
       cx: 320.0
-      cy: 240.0
+      cy: 180.0
     measurement_model:
       type: continuous_ray
       range_sigma: { meters: 0.08 }
@@ -33,26 +33,26 @@ measurement_integrators:
       scaling_occupied: 0.6
     integration_method:
       type: hashed_wavelet_integrator
-      min_range: { meters: 0.3 }
-      max_range: { meters: 8.0 }
+      min_range: { meters: 0.5 }
+      max_range: { meters: 9.0 }
       max_update_resolution: { meters: 0.1 }
 
   gazebo_long:
     projection_model:
       type: pinhole_camera_projector
       width: 640
-      height: 480
-      fx: 387.2292480468
-      fy: 387.2292480468
+      height: 360
+      fx: 432.50
+      fy: 270.31
       cx: 320.0
-      cy: 240.0
+      cy: 180.0
     measurement_model:
       type: continuous_ray
-      range_sigma: { meters: 0.4 }
+      range_sigma: { meters: 0.25 }
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
       type: hashed_wavelet_integrator
-      min_range: { meters: 8.0 }
-      max_range: { meters: 15.0 }
-      max_update_resolution: { meters: 0.4 }
+      min_range: { meters: 9.0 }
+      max_range: { meters: 19.0 }
+      max_update_resolution: { meters: 0.3 }

@@ -45,10 +45,11 @@ namespace msp
       attitude_subscription = this->create_subscription<px4_msgs::msg::VehicleAttitude>(
           "/msp/out/vehicle_attitude", this->getQos(), [this](const px4_msgs::msg::VehicleAttitude::UniquePtr msg)
           {
-            Eigen::Quaternion<float> quaternion(msg->q[0], // w
+            Eigen::Quaternion<float> quaternion( msg->q[0], // w
                                                 -msg->q[1], // x
                                                 -msg->q[2], // y
-                                                 msg->q[3]  // z
+                                                -msg->q[3]  // z
+                                                
             );
             //  quaternion.normalize();
             Eigen::Matrix3f body_r_m = quaternion.toRotationMatrix();
@@ -59,7 +60,7 @@ namespace msp
             body2world(2, 3) = pos_[2];
             body2world(3, 3) = 1.0;
 
-            Eigen::Matrix4f cam_T = body2world * cam2body_;
+            Eigen::Matrix4f cam_T =  body2world * cam2body_ ;
             Eigen::Quaternionf q(cam_T.block<3, 3>(0, 0));
 
             T_W_C.getRotation() = Rotation3D(q);

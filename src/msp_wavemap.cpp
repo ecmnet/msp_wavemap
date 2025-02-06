@@ -113,7 +113,7 @@ void MSWaveMapNode::initialize()
 
 void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 {
-  if (++count % 3 != 0)
+  if (++count % 2 != 0)
     return;
 
   cv::Mat floatImg = cv::Mat(msg.height(), msg.width(), CV_32FC1, (void *)msg.data().data());
@@ -129,8 +129,8 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
   auto t2 = std::chrono::high_resolution_clock::now();
   std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
 
-  // const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
-  // std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
+  const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
+  std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
 }
 
 void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
