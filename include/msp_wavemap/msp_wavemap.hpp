@@ -49,9 +49,9 @@ namespace msp
                                                 -msg->q[1], // x
                                                 -msg->q[2], // y
                                                 -msg->q[3]  // z
-                                                
+
             );
-            //  quaternion.normalize();
+          
             Eigen::Matrix3f body_r_m = quaternion.toRotationMatrix();
             Eigen::Matrix4f body2world;
             body2world.block<3, 3>(0, 0) = body_r_m;
@@ -68,7 +68,7 @@ namespace msp
 
       local_pos_subscription = this->create_subscription<px4_msgs::msg::VehicleLocalPosition>(
           "/msp/out/vehicle_local_position", this->getQos(), [this](const px4_msgs::msg::VehicleLocalPosition::UniquePtr msg)
-          { pos_ << msg->x, msg->y, -msg->z; });
+          { pos_ << msg->x, -msg->y, -msg->z; });
 
       initialize();
     }

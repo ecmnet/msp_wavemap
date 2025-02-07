@@ -55,15 +55,14 @@ namespace msp
 
             // Define a functor that converts map leaf nodes into pointcloud points
             auto add_points_for_leaf_node =
-                [this,min_cell_width = _map->getMinCellWidth(),
+                [this, min_cell_width = _map->getMinCellWidth(),
                  occupancy_threshold = 0.5f,
                  pcl = &pcl_cloud](
                     const OctreeIndex &node_index, FloatingPoint node_log_odds)
             {
-
                 if (occupancy_threshold < node_log_odds)
                 {
-                    
+
                     const FloatingPoint cell_width =
                         convert::heightToCellWidth(min_cell_width, node_index.height);
 
@@ -72,39 +71,15 @@ namespace msp
 
                     const float min_width_2 = min_cell_width / 2.0f;
                     const float cell_width_2 = cell_width / 2.0f;
-                    for(float sx = -cell_width_2; sx < cell_width_2; sx += min_cell_width) 
-                      for(float sy = -cell_width_2; sy < cell_width_2; sy += min_cell_width) 
-                        for(float sz = -cell_width_2; sz < cell_width_2; sz += min_cell_width) {
-                            const pcl::PointXYZ pcl_point(center.x()+sx+min_width_2, 
-                                                          center.y()+sy+min_width_2, 
-                                                          center.z()+sz+min_width_2);
-                            pcl->emplace_back(pcl_point);
-                        }
-
-                    // if(cell_width == min_cell_width) {
-                    // const pcl::PointXYZ pcl_point(center.x(), center.y(), center.z());
-                    // pcl->emplace_back(pcl_point);
-                    // } else {
-                    // const float min2 = min_cell_width / 2.0f;
-                    // const pcl::PointXYZ pcl_point1(center.x()+min2, center.y()+min2, center.z()+min2);
-                    // pcl->emplace_back(pcl_point1);
-                    // const pcl::PointXYZ pcl_point2(center.x()-min2, center.y()+min2, center.z()+min2);
-                    // pcl->emplace_back(pcl_point2);
-                    // const pcl::PointXYZ pcl_point3(center.x()+min2, center.y()-min2, center.z()+min2);
-                    // pcl->emplace_back(pcl_point3);
-                    //  const pcl::PointXYZ pcl_point4(center.x()-min2, center.y()-min2, center.z()+min2);
-                    // pcl->emplace_back(pcl_point4);
-                    // const pcl::PointXYZ pcl_point5(center.x()+min2, center.y()+min2, center.z()-min2);
-                    // pcl->emplace_back(pcl_point5);
-                    // const pcl::PointXYZ pcl_point6(center.x()-min2, center.y()+min2, center.z()-min2);
-                    // pcl->emplace_back(pcl_point6);
-                    // const pcl::PointXYZ pcl_point7(center.x()+min2, center.y()-min2, center.z()-min2);
-                    // pcl->emplace_back(pcl_point7);
-                    //  const pcl::PointXYZ pcl_point8(center.x()-min2, center.y()-min2, center.z()-min2);
-                    // pcl->emplace_back(pcl_point8);
-
-
-                  //  }
+                    for (float sx = -cell_width_2; sx < cell_width_2; sx += min_cell_width)
+                        for (float sy = -cell_width_2; sy < cell_width_2; sy += min_cell_width)
+                            for (float sz = -cell_width_2; sz < cell_width_2; sz += min_cell_width)
+                            {
+                                const pcl::PointXYZ pcl_point(center.x() + sx + min_width_2,
+                                                              center.y() + sy + min_width_2,
+                                                              center.z() + sz + min_width_2);
+                                pcl->emplace_back(pcl_point);
+                            }
                 }
             };
 
@@ -117,7 +92,6 @@ namespace msp
                     last_run_timestamp_internal_ < block.getLastUpdatedStamp();
                 if (block_changed)
                 {
-                    
                     block.forEachLeaf(block_index, add_points_for_leaf_node);
                 }
             };
@@ -142,6 +116,7 @@ namespace msp
             }
 
             last_run_timestamp_internal_ = Time::now();
+            
             if (pcl_cloud.points.size() > 0)
             {
                 sensor_msgs::msg::PointCloud2 ros_cloud;

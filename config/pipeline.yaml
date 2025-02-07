@@ -3,7 +3,7 @@
 #       https://ethz-asl.github.io/wavemap/pages/parameters
 
 map:
-  type: hashed_wavelet_octree
+  type: hashed_chunked_wavelet_octree
   min_cell_width: { meters: 0.1 }
 
 map_operations:
@@ -13,7 +13,7 @@ map_operations:
     once_every: { seconds: 10.0 }
   - type: crop_map
     once_every: { seconds: 0.1 }
-    remove_blocks_beyond_distance: { meters: 7.0 }
+    remove_blocks_beyond_distance: { meters: 15.0 }
     only_when_moved: { meters: 0.3 }
 
 measurement_integrators:
@@ -23,7 +23,7 @@ measurement_integrators:
       width: 640
       height: 360
       fx: 432.50
-      fy: 270.31
+      fy: 432.50
       cx: 320.0
       cy: 180.0
     measurement_model:
@@ -32,9 +32,9 @@ measurement_integrators:
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
-      type: hashed_wavelet_integrator
+      type: hashed_chunked_wavelet_integrator
       min_range: { meters: 0.5 }
-      max_range: { meters: 9.0 }
+      max_range: { meters: 6.0 }
       max_update_resolution: { meters: 0.1 }
 
   gazebo_long:
@@ -43,16 +43,16 @@ measurement_integrators:
       width: 640
       height: 360
       fx: 432.50
-      fy: 270.31
+      fy: 432.50
       cx: 320.0
       cy: 180.0
     measurement_model:
       type: continuous_ray
-      range_sigma: { meters: 0.25 }
+      range_sigma: { meters: 0.3 }
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
-      type: hashed_wavelet_integrator
-      min_range: { meters: 9.0 }
-      max_range: { meters: 19.0 }
-      max_update_resolution: { meters: 0.3 }
+      type: hashed_chunked_wavelet_integrator
+      min_range: { meters: 6.0 }
+      max_range: { meters: 15.0 }
+      max_update_resolution: { meters: 0.4 }
