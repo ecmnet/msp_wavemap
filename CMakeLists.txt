@@ -32,22 +32,36 @@ find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
+
 
 add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp 
                                 lib/config/yaml_cpp_conversions.cc
                                 lib/config/stream_conversions.cc
                                 lib/config/file_conversions.cc
+                                lib/utils/tf_transformer.cc
                                 lib/map_operations/crop_map_operation.cc
                                 lib/map_operations/msp_map_operation_factory.cc
                                 
                               )
 include_directories(include dependencies/wavemap/library/cpp/include)
                                           
-ament_target_dependencies(${PROJECT_NAME} msp_controller msp_msgs px4_msgs rclcpp gz-transport13 Eigen3 pcl_conversions  cv_bridge OpenCV )
+ament_target_dependencies(${PROJECT_NAME} msp_controller 
+                   msp_msgs px4_msgs rclcpp 
+                   tf2 tf2_ros 
+                   gz-transport13 
+                   Eigen3 
+                   pcl_conversions 
+                   cv_bridge 
+                   OpenCV 
+                   geometry_msgs )
+
 ament_export_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include)
 
 target_link_libraries(${PROJECT_NAME} 
-                      yaml-cpp
+                      yaml-cpp 
                       Eigen3::Eigen
                       wavemap::wavemap_core
                       wavemap::wavemap_io
@@ -57,7 +71,7 @@ target_link_libraries(${PROJECT_NAME}
 #target_include_directories(${PROJECT_NAME})
 
 
-ament_export_dependencies(ament_cmake rclcpp rosidl_default_runtime  )
+ament_export_dependencies(ament_cmake rclcpp rosidl_default_runtime )
 
 
 # Install config files

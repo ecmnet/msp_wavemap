@@ -2,18 +2,21 @@
 #       directory, and all available params are documented at:
 #       https://ethz-asl.github.io/wavemap/pages/parameters
 
+general:
+  world_frame: "world"
+
 map:
   type: hashed_chunked_wavelet_octree
-  min_cell_width: { meters: 0.1 }
+  min_cell_width: { meters: 0.2 }
 
 map_operations:
   - type: threshold_map
-    once_every: { seconds: 5.0 }
+    once_every: { seconds: 2.0 }
   - type: prune_map
     once_every: { seconds: 10.0 }
   - type: crop_map
     once_every: { seconds: 0.1 }
-    remove_blocks_beyond_distance: { meters: 15.0 }
+    remove_blocks_beyond_distance: { meters: 25.0 }
     only_when_moved: { meters: 0.3 }
 
 measurement_integrators:
@@ -28,14 +31,15 @@ measurement_integrators:
       cy: 180.0
     measurement_model:
       type: continuous_ray
-      range_sigma: { meters: 0.08 }
+      range_sigma: { meters: 0.12 }
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
       type: hashed_chunked_wavelet_integrator
       min_range: { meters: 0.5 }
-      max_range: { meters: 6.0 }
-      max_update_resolution: { meters: 0.1 }
+      max_range: { meters: 10.0 }
+      max_update_resolution: { meters: 0 }
+      #termination_update_error: { meters: 0.1 }
 
   gazebo_long:
     projection_model:
@@ -48,11 +52,12 @@ measurement_integrators:
       cy: 180.0
     measurement_model:
       type: continuous_ray
-      range_sigma: { meters: 0.3 }
+      range_sigma: { meters: 0.5 }
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
       type: hashed_chunked_wavelet_integrator
-      min_range: { meters: 6.0 }
-      max_range: { meters: 15.0 }
-      max_update_resolution: { meters: 0.4 }
+      min_range: { meters: 10.0 }
+      max_range: { meters: 19.0 }
+      max_update_resolution: { meters: 0.8 }
+      
