@@ -35,7 +35,7 @@ namespace msp
   class MSWaveMapNode : public msp::MSPNodeBase // public rclcpp::Node
   {
   public:
-    explicit MSWaveMapNode() : msp::MSPNodeBase("MSWaveMapNode", MSP_COMP_AVOID)
+    explicit MSWaveMapNode() : msp::MSPNodeBase("MSWaveMapNode", MSP_COMP_MAP)
     {
 
       gz_node = std::make_unique<gz::transport::Node>();
