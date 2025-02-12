@@ -16,7 +16,7 @@ map_operations:
     once_every: { seconds: 10.0 }
   - type: crop_map
     once_every: { seconds: 0.1 }
-    remove_blocks_beyond_distance: { meters: 25.0 }
+    remove_blocks_beyond_distance: { meters: 15.0 }
     only_when_moved: { meters: 0.3 }
 
 measurement_integrators:
@@ -31,7 +31,7 @@ measurement_integrators:
       cy: 180.0
     measurement_model:
       type: continuous_ray
-      range_sigma: { meters: 0.12 }
+      range_sigma: { meters: 0.15 }
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
@@ -58,6 +58,6 @@ measurement_integrators:
     integration_method:
       type: hashed_chunked_wavelet_integrator
       min_range: { meters: 10.0 }
-      max_range: { meters: 19.0 }
+      max_range: { meters: 15.0 }
       max_update_resolution: { meters: 0.8 }
       

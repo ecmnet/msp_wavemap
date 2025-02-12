@@ -41,7 +41,7 @@ add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp
                                 lib/config/yaml_cpp_conversions.cc
                                 lib/config/stream_conversions.cc
                                 lib/config/file_conversions.cc
-                                lib/utils/tf_transformer.cc
+                               # lib/utils/tf_transformer.cc
                                 lib/map_operations/crop_map_operation.cc
                                 lib/map_operations/msp_map_operation_factory.cc
                                 
