@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>waverider</name>
+  <version>0.0.0</version>
+  <description>Base library for waverider.</description>
+
+  <maintainer email="victorr@ethz.ch">Victor Reijgwart</maintainer>
+  <license>BSD</license>
+  <url>https://github.com/ethz-asl/waverider</url>
+
+  <author email="victorr@ethz.ch">Victor Reijgwart</author>
+  <author email="michael.pantic@mavt.ethz.ch">Michael Pantic</author>
+
+
+</package>
