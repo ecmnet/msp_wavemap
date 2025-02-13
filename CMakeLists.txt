@@ -13,11 +13,11 @@ endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp wavemap
-                 #${CMAKE_CURRENT_BINARY_DIR}/wavemap
-                 )
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp wavemap)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider)
 
-include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include)
+include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include
+                            ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider/include)
 
 find_package(ament_cmake REQUIRED)
 find_package(builtin_interfaces REQUIRED)
@@ -46,7 +46,8 @@ add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp
                                 lib/map_operations/msp_map_operation_factory.cc
                                 
                               )
-include_directories(include dependencies/wavemap/library/cpp/include)
+include_directories(include dependencies/wavemap/library/cpp/include
+                            dependencies/waverider/waverider/include)
                                           
 ament_target_dependencies(${PROJECT_NAME} msp_controller 
                    msp_msgs px4_msgs rclcpp 
@@ -58,11 +59,13 @@ ament_target_dependencies(${PROJECT_NAME} msp_controller
                    OpenCV 
                    geometry_msgs )
 
-ament_export_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include)
+ament_export_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include
+                                         ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider/include)
 
 target_link_libraries(${PROJECT_NAME} 
                       yaml-cpp 
                       Eigen3::Eigen
+                      waverider
                       wavemap::wavemap_core
                       wavemap::wavemap_io
                       wavemap::wavemap_pipeline

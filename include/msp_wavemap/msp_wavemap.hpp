@@ -93,8 +93,8 @@ namespace msp
       transformStamped.child_frame_id = "camera_link"; // Child frame
 
       // Translation (Camera position relative to body frame)
-      transformStamped.transform.translation.x = 0.1; // 10 cm forward
-      transformStamped.transform.translation.y = 0.0; // 5 cm right
+      transformStamped.transform.translation.x = 0.14; // 10 cm forward
+      transformStamped.transform.translation.y = 0.00; // 5 cm right
       transformStamped.transform.translation.z = 0.0; // 20 cm up
 
       tf2::Quaternion q;
