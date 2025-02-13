@@ -6,7 +6,8 @@ general:
   world_frame: "world"
 
 map:
-  type: hashed_chunked_wavelet_octree
+ # type: hashed_chunked_wavelet_octree
+  type: hashed_wavelet_octree
   min_cell_width: { meters: 0.2 }
 
 map_operations:
@@ -35,7 +36,8 @@ measurement_integrators:
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
-      type: hashed_chunked_wavelet_integrator
+     # type: hashed_chunked_wavelet_integrator
+      type: hashed_wavelet_integrator
       min_range: { meters: 0.5 }
       max_range: { meters: 10.0 }
       max_update_resolution: { meters: 0 }
@@ -56,7 +58,8 @@ measurement_integrators:
       scaling_free: 0.3
       scaling_occupied: 0.6
     integration_method:
-      type: hashed_chunked_wavelet_integrator
+    # type: hashed_chunked_wavelet_integrator
+      type: hashed_wavelet_integrator
       min_range: { meters: 10.0 }
       max_range: { meters: 19.0 }
       max_update_resolution: { meters: 0.8 }

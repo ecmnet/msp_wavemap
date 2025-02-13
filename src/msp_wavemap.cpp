@@ -142,10 +142,15 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 
   pipeline_->runPipeline({"gazebo_short", "gazebo_long"}, depth_image);
   auto t2 = std::chrono::high_resolution_clock::now();
+  wave_rider_.updateMap(occupancy_map_);
+  auto t3 = std::chrono::high_resolution_clock::now();
 
   std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
+  std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() / 1000000 << "ms\n";
   const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
   std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
+  
+
 }
 
 void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,

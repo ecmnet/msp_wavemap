@@ -15,6 +15,8 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
+#include <msp_wavemap/msp_waverider.hpp>
+
 #include "msp_controller/ros2/tf_transformer.h"
 
 #include <wavemap/core/config/config_base.h>
@@ -66,6 +68,8 @@ namespace msp
 
     int count;
     bool in_collision = false;
+
+    msp::MSPWaveRider wave_rider_ = msp::MSPWaveRider(this,"world",transformer_);
 
     msp::MSPMap2ROS2Publisher map_publisher = msp::MSPMap2ROS2Publisher(this);
 
