@@ -38,6 +38,7 @@ find_package(geometry_msgs REQUIRED)
 
 
 add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp 
+                                src/msp_waverider.cpp
                                 lib/config/yaml_cpp_conversions.cc
                                 lib/config/stream_conversions.cc
                                 lib/config/file_conversions.cc
@@ -47,7 +48,9 @@ add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp
                                 
                               )
 include_directories(include dependencies/wavemap/library/cpp/include
-                            dependencies/waverider/waverider/include)
+                            dependencies/waverider/waverider/include
+                            dependencies/rmpcpp/include
+                            )
                                           
 ament_target_dependencies(${PROJECT_NAME} msp_controller 
                    msp_msgs px4_msgs rclcpp 
