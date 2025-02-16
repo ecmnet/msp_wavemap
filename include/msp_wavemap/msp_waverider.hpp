@@ -77,6 +77,8 @@ namespace msp
         MSPWaveRiderConfig readConfig();
         std::optional<Plane3D> getGroundPlaneFromTf();
 
+        void evaluatePolicy();
+
         MSPWaveRiderConfig config_;
         std::string map_frame_;
 
@@ -84,6 +86,11 @@ namespace msp
         YawPolicy yaw_policy_;
         WaveriderPolicy map_obstacles_policy_;
         ObstacleListPolicy aabb_obstacles_policy_;
+
+        struct {
+            std::vector<ObstacleListPolicy::ObstacleList> data;
+            std::mutex mutex;
+          } aabb_lists_;
 
         std::shared_ptr<TfTransformer> transformer_;
         

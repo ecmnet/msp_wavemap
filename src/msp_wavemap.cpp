@@ -110,7 +110,8 @@ void MSWaveMapNode::initialize()
     pipeline_->addIntegrator(integrator_name, integrator_params);
   }
 
-  map_publisher.setMap(occupancy_map_);
+  pcl_publisher.setMap(occupancy_map_);
+  msp_publisher.setMap(occupancy_map_);
 
   // Publish Camera Tranform
   publish_camera_transform();
@@ -142,7 +143,7 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 
   pipeline_->runPipeline({"gazebo_short", "gazebo_long"}, depth_image);
   auto t2 = std::chrono::high_resolution_clock::now();
-  wave_rider_.updateMap(occupancy_map_);
+ // wave_rider_.updateMap(occupancy_map_);
   auto t3 = std::chrono::high_resolution_clock::now();
 
   std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";

@@ -60,7 +60,8 @@ ament_target_dependencies(${PROJECT_NAME} msp_controller
                    pcl_conversions 
                    cv_bridge 
                    OpenCV 
-                   geometry_msgs )
+                   geometry_msgs
+                    )
 
 ament_export_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include
                                          ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider/include)

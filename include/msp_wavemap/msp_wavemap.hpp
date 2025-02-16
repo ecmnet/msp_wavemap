@@ -8,6 +8,7 @@
 #include <px4_msgs/msg/obstacle_distance.hpp>
 // #include <msp_msgs/msg/trajectory.hpp>
 #include <msp_wavemap/ros2/ros2map_publisher.hpp>
+#include <msp_wavemap/ros2/msp_grid_publisher.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <opencv2/opencv.hpp>
 #include <gz/transport/Node.hh>
@@ -71,7 +72,8 @@ namespace msp
 
     msp::MSPWaveRider wave_rider_ = msp::MSPWaveRider(this,"world",transformer_);
 
-    msp::MSPMap2ROS2Publisher map_publisher = msp::MSPMap2ROS2Publisher(this);
+    msp::MSPMap2ROS2Publisher pcl_publisher = msp::MSPMap2ROS2Publisher(this,transformer_);
+    msp::MSPGridPublisher     msp_publisher = msp::MSPGridPublisher(this,transformer_);
 
     rclcpp::Service<msp_msgs::srv::TrajectoryCheck>::SharedPtr msp_trajectory_check;
 

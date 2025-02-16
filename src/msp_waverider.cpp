@@ -14,7 +14,9 @@ using namespace waverider;
 namespace msp
 {
     DECLARE_CONFIG_MEMBERS(MSPWaveRiderConfig,
-                           (odom_frame)(goal_tf_frame)(ground_plane_tf_frame)(tf_lookup_delay)(ground_plane_offset)(occupancy_threshold)(control_period)(integrator_step_size)(publish_debug_visuals_every_n_iterations)(goal_policy)(yaw_policy)(map_obstacles_policy)(aabb_obstacles_policy));
+                           (odom_frame)(goal_tf_frame)(ground_plane_tf_frame)(tf_lookup_delay)(ground_plane_offset)
+                           (occupancy_threshold)(control_period)(integrator_step_size)(publish_debug_visuals_every_n_iterations)
+                           (goal_policy)(yaw_policy)(map_obstacles_policy)(aabb_obstacles_policy));
 
     bool MSPWaveRiderConfig::isValid(bool verbose) const
     {
@@ -59,17 +61,38 @@ namespace msp
 
         const auto T_W_C = transformer_->lookupLatestTransform("base_link", "world");
 
-
-        if (auto* hashed_map = dynamic_cast<HashedWaveletOctree*>(map.get());
-               hashed_map) {
+        if (auto *hashed_map = dynamic_cast<HashedWaveletOctree *>(map.get());
+            hashed_map)
+        {
             map_obstacles_policy_.updateObstacles(*hashed_map, T_W_C->getPosition(),
                                                   *ground_plane);
         }
         else
         {
             RCLCPP_WARN(node_->get_logger(),
-                "Waverider policies can currently only be extracted from maps of "
-                "type wavemap::HashedWaveletOctree.");
+                        "Waverider policies can currently only be extracted from maps of "
+                        "type wavemap::HashedWaveletOctree.");
+        }
+
+        evaluatePolicy();
+    }
+
+    void MSPWaveRider::evaluatePolicy()
+    {
+
+        if (!map_obstacles_policy_.isReady())
+        {
+            RCLCPP_INFO(node_->get_logger(), "Policy not yet initialized.");
+            return;
+        }
+
+        aabb_obstacles_policy_.clearObstacles();
+        {
+            std::unique_lock lock(aabb_lists_.mutex);
+            for (const auto &aabb_list : aabb_lists_.data)
+            {
+                aabb_obstacles_policy_.addObstacles(aabb_list);
+            }
         }
     }
 
