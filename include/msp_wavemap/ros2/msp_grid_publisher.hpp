@@ -5,9 +5,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
-#include <pcl_conversions/pcl_conversions.h>
+
 
 #include <wavemap/core/map/map_base.h>
 #include <wavemap/core/map/hashed_chunked_wavelet_octree.h>
@@ -138,9 +136,37 @@ namespace msp
                         list.emplace_back(block);
                     }
                 }
-
-                transfer_grid(&list, reference.cast<float>());
             }
+
+            if (const auto *hashed_chunked_wavelet_octree =
+                    dynamic_cast<const HashedWaveletOctree *>(_map.get());
+                hashed_chunked_wavelet_octree)
+            {
+
+                const wavemap::FloatingPoint min_cell_width = hashed_chunked_wavelet_octree->getMinCellWidth();
+                const wavemap::Index3D min_corner_index =
+                    wavemap::convert::pointToFloorIndex(lower_bound_wavemap,
+                                                        1.f / min_cell_width);
+                const wavemap::Index3D max_corner_index =
+                    wavemap::convert::pointToCeilIndex(upper_bound_wavemap,
+                                                       1.f / min_cell_width);
+
+                wavemap::QueryAccelerator query_accelerator(*hashed_chunked_wavelet_octree);
+                for (const auto &query_index :
+                     wavemap::Grid<3>(min_corner_index, max_corner_index))
+                {
+                    const wavemap::FloatingPoint occupancy_log_odds = query_accelerator.getCellValue(query_index);
+                    if (occupancy_log_odds > 0.5)
+                    {
+                        const auto index = OctreeIndex{0, query_index};
+                        const Point3D block = convert::indexToCenterPoint(index.position, min_cell_width);
+
+                        list.emplace_back(block);
+                    }
+                }
+            }
+ 
+            transfer_grid(&list, reference.cast<float>()); 
         }
 
         uint64_t encode(Point3D p, float extension, float resolution)
