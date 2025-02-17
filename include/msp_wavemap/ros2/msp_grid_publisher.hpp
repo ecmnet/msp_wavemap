@@ -9,8 +9,6 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 
-#include <msp_wavemap/ros2/morton3D_encoding.h>
-
 #include <wavemap/core/map/map_base.h>
 #include <wavemap/core/map/hashed_chunked_wavelet_octree.h>
 #include <wavemap/core/map/hashed_wavelet_octree.h>
@@ -69,6 +67,9 @@ namespace msp
         {
              msp_msgs::msg::MicroGrid grid;
 
+            if(list->size() == 0)
+              return;
+
             int count = 0;
 
             grid.center[0] = r.x();
@@ -84,9 +85,7 @@ namespace msp
                 
                 auto p = list->back();
                 list->pop_back();
-               // TODO: Use Motron encoding (current implementation works not with java clients)
-               // grid.data[grid.count] = mortonEncode3D(p.x(),p.y(),0.75f);
-               grid.data[grid.count] = encode(p, 5, 1001, 1);
+                grid.data[grid.count] = encode(p, grid.extension, grid.resolution);
                 if (grid.count >= 24)
                 {   count++;
                    microgrid_publisher_->publish(grid);
@@ -94,11 +93,9 @@ namespace msp
                     continue;
                 }
                 grid.count++;
-
             }
 
-             if (grid.count > 0)
-                microgrid_publisher_->publish(grid);
+            microgrid_publisher_->publish(grid);
   
         }
 
@@ -146,12 +143,12 @@ namespace msp
             }
         }
 
-
-        int64_t encode(Point3D p, double res_inv, int64_t dimension, double probability)
+        uint64_t encode(Point3D p, float extension, float resolution)
         {
-            return int64_t((p.x()+50.0f) * res_inv + 0.1f) +
-                   int64_t((p.y()+50.0f) * res_inv + 0.1f) * dimension +
-                   int64_t(100.0 * probability) * dimension * dimension ;
+            uint16_t f = static_cast<uint16_t>( extension / resolution );
+            return (static_cast<uint64_t>( (p.x() + f ) * f * 2) & 0x1FFFFFUL ) |
+                   (static_cast<uint64_t>( (p.y() + f ) * f * 2) & 0x1FFFFFUL ) << 21 |
+                   (static_cast<uint64_t>( (p.z() + f ) * f * 2) & 0x1FFFFFUL ) << 42;
         }
 
         rclcpp::Node *_node;
