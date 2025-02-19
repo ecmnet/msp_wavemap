@@ -39,7 +39,6 @@ void MSWaveMapNode::initialize()
   gz_node->Subscribe("/depth_camera", &MSWaveMapNode::onDepthReceived, this);
 
   // trajectory_publisher_ = this->create_publisher<msp_msgs::msg::Trajectory>("msp/in/trajectory", this->getQos());
-  obstacle_publisher_ = this->create_publisher<px4_msgs::msg::ObstacleDistance>("msp/in/obstacle_distance", this->getQos());
   tf_broadcaster_ = std::make_shared<tf2_ros::TransformBroadcaster>(this);
 
   std::string base_path = ament_index_cpp::get_package_share_directory("msp_wavemap");
@@ -146,10 +145,10 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
  // wave_rider_.updateMap(occupancy_map_);
   auto t3 = std::chrono::high_resolution_clock::now();
 
-  std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
-  std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() / 1000000 << "ms\n";
-  const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
-  std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
+  // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
+  // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() / 1000000 << "ms\n";
+  // const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
+  // std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
   
 
 }

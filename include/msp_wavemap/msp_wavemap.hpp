@@ -52,6 +52,16 @@ namespace msp
 
     void initialize();
 
+  protected:
+    void onArmingState(uint8_t arming_state) override
+    {
+      if (arming_state & px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED )
+      {
+        RCLCPP_INFO(this->get_logger(), "Clearing map");
+        occupancy_map_->clear();
+      }
+    }
+
   private:
     std::unique_ptr<gz::transport::Node> gz_node;
 
@@ -70,10 +80,10 @@ namespace msp
     int count;
     bool in_collision = false;
 
-    msp::MSPWaveRider wave_rider_ = msp::MSPWaveRider(this,"world",transformer_);
+    msp::MSPWaveRider wave_rider_ = msp::MSPWaveRider(this, "world", transformer_);
 
-    msp::MSPMap2ROS2Publisher pcl_publisher = msp::MSPMap2ROS2Publisher(this,transformer_);
-    msp::MSPGridPublisher     msp_publisher = msp::MSPGridPublisher(this,transformer_);
+    msp::MSPMap2ROS2Publisher pcl_publisher = msp::MSPMap2ROS2Publisher(this, transformer_);
+    msp::MSPGridPublisher msp_publisher = msp::MSPGridPublisher(this, transformer_);
 
     rclcpp::Service<msp_msgs::srv::TrajectoryCheck>::SharedPtr msp_trajectory_check;
 
@@ -81,7 +91,6 @@ namespace msp
     std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_broadcaster_;
 
     // rclcpp::Publisher<msp_msgs::msg::Trajectory>::SharedPtr trajectory_publisher_;
-    rclcpp::Publisher<px4_msgs::msg::ObstacleDistance>::SharedPtr obstacle_publisher_;
 
     void onDepthReceived(const gz::msgs::Image &msg);
     void onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
@@ -101,7 +110,7 @@ namespace msp
       // Translation (Camera position relative to body frame)
       transformStamped.transform.translation.x = 0.14; // 10 cm forward
       transformStamped.transform.translation.y = 0.00; // 5 cm right
-      transformStamped.transform.translation.z = 0.0; // 20 cm up
+      transformStamped.transform.translation.z = 0.0;  // 20 cm up
 
       tf2::Quaternion q;
       q.setRPY(-M_PI_2, 0, -M_PI_2);
