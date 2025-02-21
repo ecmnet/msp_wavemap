@@ -53,9 +53,9 @@ namespace msp
     void initialize();
 
   protected:
-    void onArmingState(uint8_t arming_state) override
+    void onArmingState(uint8_t arming_state ) override
     {
-      if (arming_state & px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED )
+      if (arming_state == px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED )
       {
         RCLCPP_INFO(this->get_logger(), "Clearing map");
         occupancy_map_->clear();

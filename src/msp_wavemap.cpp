@@ -120,6 +120,10 @@ void MSWaveMapNode::initialize()
 
 void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 {
+  
+  if (this->arming_state_ == px4_msgs::msg::VehicleStatus::ARMING_STATE_DISARMED)
+  return;
+
   if (++count % 3 != 0 || occupancy_map_ == nullptr)
     return;
 
