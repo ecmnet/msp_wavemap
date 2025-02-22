@@ -1,6 +1,11 @@
 #pragma once
 #include <msp_controller/msp_node_base.hpp>
 #include <msp_controller/msp_px4.h>
+#include <msp_controller/ros2/tf_transformer.h>
+
+#include <msp_offboard_controller/segment_trajectory_generator/MSPRapidTrajectoryGenerator.h>
+#include <msp_offboard_controller/segment_trajectory_generator/utils.h>
+
 #include <msp_msgs/srv/trajectory_check.hpp>
 #include <px4_msgs/msg/vehicle_attitude.hpp>
 #include <px4_msgs/msg/vehicle_local_position.hpp>
@@ -17,8 +22,6 @@
 #include <Eigen/Geometry>
 
 #include <msp_wavemap/msp_waverider.hpp>
-
-#include "msp_controller/ros2/tf_transformer.h"
 
 #include <wavemap/core/config/config_base.h>
 #include <wavemap/core/indexing/index_hashes.h>
@@ -43,9 +46,9 @@ namespace msp
 
       gz_node = std::make_unique<gz::transport::Node>();
 
-      // msp_trajectory_check = this->create_service<msp_msgs::srv::TrajectoryCheck>(
-      //     "/msp/in/trajectory_check",
-      //     std::bind(&MSWaveMapNode::onTrajectoryCheck, this, std::placeholders::_1, std::placeholders::_2));
+      msp_trajectory_check = this->create_service<msp_msgs::srv::TrajectoryCheck>(
+          "/msp/in/trajectory_check",
+          std::bind(&MSWaveMapNode::onTrajectoryCheck, this, std::placeholders::_1, std::placeholders::_2));
 
       initialize();
     }
@@ -86,6 +89,7 @@ namespace msp
     msp::MSPGridPublisher msp_publisher = msp::MSPGridPublisher(this, transformer_);
 
     rclcpp::Service<msp_msgs::srv::TrajectoryCheck>::SharedPtr msp_trajectory_check;
+    msp::MSPRapidTrajectoryGenerator planner_ = msp::MSPRapidTrajectoryGenerator();
 
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_broadcaster_;
@@ -95,6 +99,7 @@ namespace msp
     void onDepthReceived(const gz::msgs::Image &msg);
     void onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
                            std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Response> response);
+    uint8_t checkPlanItem(msp::PlanItem item);
 
     void publish_camera_transform()
     {

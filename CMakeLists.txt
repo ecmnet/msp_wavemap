@@ -25,6 +25,7 @@ find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(msp_msgs REQUIRED)
 find_package(msp_controller REQUIRED)
+find_package(msp_offboard_controller REQUIRED)
 find_package(gz-transport13 REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(cv_bridge REQUIRED)
@@ -35,6 +36,8 @@ find_package(yaml-cpp REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
+
+
 
 
 add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp 
@@ -51,9 +54,13 @@ include_directories(include dependencies/wavemap/library/cpp/include
                             dependencies/waverider/waverider/include
                             dependencies/rmpcpp/include
                             )
+
                                           
-ament_target_dependencies(${PROJECT_NAME} msp_controller 
-                   msp_msgs px4_msgs rclcpp 
+ament_target_dependencies(${PROJECT_NAME} 
+                   msp_controller 
+                   msp_offboard_controller
+                   msp_msgs 
+                   px4_msgs rclcpp 
                    tf2 tf2_ros 
                    gz-transport13 
                    Eigen3 
@@ -63,8 +70,8 @@ ament_target_dependencies(${PROJECT_NAME} msp_controller
                    geometry_msgs
                     )
 
-ament_export_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include
-                                         ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider/include)
+#ament_export_include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include
+#                                         ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider/include)
 
 target_link_libraries(${PROJECT_NAME} 
                       yaml-cpp 
@@ -75,10 +82,7 @@ target_link_libraries(${PROJECT_NAME}
                       wavemap::wavemap_pipeline
 )
 
-#target_include_directories(${PROJECT_NAME})
 
-
-ament_export_dependencies(ament_cmake rclcpp rosidl_default_runtime )
 
 
 # Install config files

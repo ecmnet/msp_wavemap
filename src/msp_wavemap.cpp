@@ -19,9 +19,11 @@
 #include <wavemap/pipeline/pipeline.h>
 #include <wavemap/core/utils/query/map_interpolator.h>
 #include <wavemap/core/utils/iterate/grid_iterator.h>
+
 #include <msp_msgs/msg/trajectory.hpp>
 
 #include <msp_wavemap/lib/config/stream_conversions.h>
+
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <fstream>
 #include <sstream>
@@ -120,9 +122,9 @@ void MSWaveMapNode::initialize()
 
 void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 {
-  
+
   if (this->arming_state_ == px4_msgs::msg::VehicleStatus::ARMING_STATE_DISARMED)
-  return;
+    return;
 
   if (++count % 3 != 0 || occupancy_map_ == nullptr)
     return;
@@ -146,21 +148,63 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 
   pipeline_->runPipeline({"gazebo_short", "gazebo_long"}, depth_image);
   auto t2 = std::chrono::high_resolution_clock::now();
- // wave_rider_.updateMap(occupancy_map_);
+  // wave_rider_.updateMap(occupancy_map_);
   auto t3 = std::chrono::high_resolution_clock::now();
 
   // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
   // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() / 1000000 << "ms\n";
   // const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
   // std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
-  
-
 }
 
 void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
                                       std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Response> response)
 {
-  response->reply.status = msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION;
+
+  for (int i = 0; i < request->plan.count; i++)
+  {
+    auto item = msp::ros2::convert::fromTrajectoryPlanItemMessage(request->plan.segments[i]);
+    response->reply.status = checkPlanItem(item);
+    if (response->reply.status != msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION)
+      break;
+  }
+}
+
+uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
+{
+
+  StateTriplet s0;
+  
+  const FloatingPoint query_min_cell_width = 0.2f; // in meters
+
+  // std::cout << "Checking item: \n"
+  //           << item << std::endl;
+  planner_.generate(&item);
+  const double time_slot = 1 / ( item.max_velocity * 10 );
+  for (double t = 0; t < item.estimated_time_s; t += time_slot)
+  {
+    planner_.getSetpointAt(t, s0);
+
+    // Transform from ned to world
+    const Point3D query_point(s0.pos.x, -s0.pos.y, -s0.pos.z);
+    if (auto *hashed_wavelet_octree =
+            dynamic_cast<HashedWaveletOctree *>(occupancy_map_.get());
+        hashed_wavelet_octree)
+    {
+      const FloatingPoint map_min_cell_width = hashed_wavelet_octree->getMinCellWidth();
+      const IndexElement query_height = convert::cellWidthToHeight(query_min_cell_width, 1.f / map_min_cell_width);
+      const OctreeIndex query_index = convert::pointToNodeIndex(query_point, map_min_cell_width, query_height);
+      const FloatingPoint occupancy_log_odds = hashed_wavelet_octree->getCellValue(query_index);
+      //std::cout << occupancy_log_odds << std::endl;
+      if (occupancy_log_odds > 0.5)
+      {
+        std::cout << "Collision at " << s0.pos << std::endl;
+        return msp_msgs::msg::TrajectoryCheckAck::STATUS_EMERGENCY_STOP;
+      }
+    }
+  }
+
+  return msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION;
 }
 
 int main(int argc, char *argv[])
