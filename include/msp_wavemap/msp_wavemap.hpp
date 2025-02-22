@@ -7,14 +7,14 @@
 #include <msp_offboard_controller/segment_trajectory_generator/utils.h>
 
 #include <msp_msgs/srv/trajectory_check.hpp>
-#include <px4_msgs/msg/vehicle_attitude.hpp>
-#include <px4_msgs/msg/vehicle_local_position.hpp>
-#include <px4_msgs/msg/vehicle_status.hpp>
+// #include <px4_msgs/msg/vehicle_attitude.hpp>
+// #include <px4_msgs/msg/vehicle_local_position.hpp>
+// #include <px4_msgs/msg/vehicle_status.hpp>
 // #include <px4_msgs/msg/obstacle_distance.hpp>
 // #include <msp_msgs/msg/trajectory.hpp>
 
-#include <msp_wavemap/ros2/ros2map_publisher.hpp>
-#include <msp_wavemap/ros2/msp_grid_publisher.hpp>
+#include <msp_wavemap/ros2/ros2_pcl_publisher.hpp>
+#include <msp_wavemap/ros2/ros2_grid_publisher.hpp>
 #include <msp_wavemap/ros2/ros2_path_publisher.hpp>
 
 #include <rclcpp/rclcpp.hpp>
@@ -61,7 +61,7 @@ namespace msp
   protected:
     void onArmingState(uint8_t arming_state ) override
     {
-      if (arming_state == px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED )
+      if (arming_state == px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED && occupancy_map_)
       {
         RCLCPP_INFO(this->get_logger(), "Clearing map");
         occupancy_map_->clear();
@@ -88,8 +88,8 @@ namespace msp
 
     msp::MSPWaveRider wave_rider_ = msp::MSPWaveRider(this, "world", transformer_);
 
-    msp::MSPMap2ROS2Publisher pcl_publisher = msp::MSPMap2ROS2Publisher(this, transformer_);
-    msp::MSPGridPublisher msp_publisher = msp::MSPGridPublisher(this, transformer_);
+    msp::MSPRos2PCLPublisher  pcl_publisher  = msp::MSPRos2PCLPublisher(this, transformer_);
+    msp::MSPRos2GridPublisher msp_publisher  = msp::MSPRos2GridPublisher(this, transformer_);
     msp::MSPRos2PathPublisher path_publisher = msp::MSPRos2PathPublisher(this);
 
     rclcpp::Service<msp_msgs::srv::TrajectoryCheck>::SharedPtr msp_trajectory_check;
@@ -117,9 +117,9 @@ namespace msp
       transformStamped.child_frame_id = "camera_link"; // Child frame
 
       // Translation (Camera position relative to body frame)
-      transformStamped.transform.translation.x = 0.14; // 10 cm forward
-      transformStamped.transform.translation.y = 0.00; // 5 cm right
-      transformStamped.transform.translation.z = 0.0;  // 20 cm up
+      transformStamped.transform.translation.x = 0.14; 
+      transformStamped.transform.translation.y = 0.00; 
+      transformStamped.transform.translation.z = 0.0;  
 
       tf2::Quaternion q;
       q.setRPY(-M_PI_2, 0, -M_PI_2);

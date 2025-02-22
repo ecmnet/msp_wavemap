@@ -176,7 +176,7 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
 
   StateTriplet s0;
   
-  const FloatingPoint query_min_cell_width = 0.2f; // in meters
+  const FloatingPoint query_min_cell_width = 1.0f; // in meters
 
   //std::cout << "Checking item: \n" << item << std::endl;
   planner_.generate(&item);

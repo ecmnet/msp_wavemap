@@ -13,6 +13,8 @@
 #include <wavemap/core/map/hashed_chunked_wavelet_octree.h>
 #include <wavemap/core/map/hashed_wavelet_octree.h>
 #include <wavemap/core/indexing/index_conversions.h>
+#include <wavemap/core/utils/query/query_accelerator.h>
+#include <wavemap/core/utils/iterate/grid_iterator.h>
 
 #include "msp_controller/ros2/tf_transformer.h"
 
@@ -29,18 +31,18 @@ namespace msp
 
     using namespace wavemap;
 
-    class MSPMap2ROS2Publisher
+    class MSPRos2PCLPublisher
     {
 
     public:
-        explicit MSPMap2ROS2Publisher(rclcpp::Node *node, std::shared_ptr<TfTransformer> transformer) : _node(node), transformer_(transformer)
+        explicit MSPRos2PCLPublisher(rclcpp::Node *node, std::shared_ptr<TfTransformer> transformer) : _node(node), transformer_(transformer)
         {
 
             point_cloud_publisher_ = _node->create_publisher<sensor_msgs::msg::PointCloud2>("cloud", 1);
 
             timer_ = _node->create_wall_timer(
-                std::chrono::milliseconds(200),
-                std::bind(&MSPMap2ROS2Publisher::publish, this));
+                    std::chrono::milliseconds(200),
+                    std::bind(&MSPRos2PCLPublisher::publish_point_cloud, this));
         }
 
         void setMap(wavemap::MapBase::Ptr map)
@@ -49,16 +51,6 @@ namespace msp
         }
 
     private:
-        void publish()
-        {
-
-            const auto T_W_C = transformer_->lookupLatestTransform("world", "camera_link");
-
-            if (!_map || T_W_C == std::nullopt)
-                return;
-
-            publish_point_cloud();
-        }
 
         void publish_point_cloud()
         {
@@ -142,6 +134,7 @@ namespace msp
                 point_cloud_publisher_->publish(ros_cloud);
             }
         }
+
 
         rclcpp::Node *_node;
         rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr point_cloud_publisher_;

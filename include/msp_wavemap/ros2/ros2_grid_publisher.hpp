@@ -26,22 +26,18 @@ using namespace wavemap;
 
 namespace msp
 {
-
-    using namespace wavemap;
-
-    class MSPGridPublisher
+    class MSPRos2GridPublisher
     {
 
     public:
-        explicit MSPGridPublisher(rclcpp::Node *node, std::shared_ptr<TfTransformer> transformer) : _node(node), transformer_(transformer)
+        explicit MSPRos2GridPublisher(rclcpp::Node *node, std::shared_ptr<TfTransformer> transformer) : _node(node), transformer_(transformer)
         {
 
             microgrid_publisher_ = _node->create_publisher<msp_msgs::msg::MicroGrid>("msp/in/micro_grid", 100);
 
             timer_ = _node->create_wall_timer(
                 std::chrono::milliseconds(50),
-                std::bind(&MSPGridPublisher::publish, this));
-
+                std::bind(&MSPRos2GridPublisher::publish, this));
         }
 
         void setMap(wavemap::MapBase::Ptr map)
@@ -52,7 +48,6 @@ namespace msp
     private:
         void publish()
         {
-
             const auto T_W_C = transformer_->lookupLatestTransform("world", "camera_link");
 
             if (!_map || T_W_C == std::nullopt)
@@ -80,7 +75,6 @@ namespace msp
             grid.count = 0;
             while (list->size() > 0)
             {
-                
                 auto p = list->back();
                 list->pop_back();
                 grid.data[grid.count] = encode(p, grid.extension, grid.resolution);
@@ -94,7 +88,6 @@ namespace msp
             }
 
             microgrid_publisher_->publish(grid);
-  
         }
 
         void publish_grid(Transformation3D twc)
