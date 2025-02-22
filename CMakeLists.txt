@@ -24,6 +24,7 @@ find_package(builtin_interfaces REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(msp_msgs REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(msp_controller REQUIRED)
 find_package(msp_offboard_controller REQUIRED)
 find_package(gz-transport13 REQUIRED)
@@ -60,6 +61,7 @@ ament_target_dependencies(${PROJECT_NAME}
                    msp_controller 
                    msp_offboard_controller
                    msp_msgs 
+                   nav_msgs
                    px4_msgs rclcpp 
                    tf2 tf2_ros 
                    gz-transport13 

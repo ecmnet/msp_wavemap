@@ -10,10 +10,13 @@
 #include <px4_msgs/msg/vehicle_attitude.hpp>
 #include <px4_msgs/msg/vehicle_local_position.hpp>
 #include <px4_msgs/msg/vehicle_status.hpp>
-#include <px4_msgs/msg/obstacle_distance.hpp>
+// #include <px4_msgs/msg/obstacle_distance.hpp>
 // #include <msp_msgs/msg/trajectory.hpp>
+
 #include <msp_wavemap/ros2/ros2map_publisher.hpp>
 #include <msp_wavemap/ros2/msp_grid_publisher.hpp>
+#include <msp_wavemap/ros2/ros2_path_publisher.hpp>
+
 #include <rclcpp/rclcpp.hpp>
 #include <opencv2/opencv.hpp>
 #include <gz/transport/Node.hh>
@@ -87,6 +90,7 @@ namespace msp
 
     msp::MSPMap2ROS2Publisher pcl_publisher = msp::MSPMap2ROS2Publisher(this, transformer_);
     msp::MSPGridPublisher msp_publisher = msp::MSPGridPublisher(this, transformer_);
+    msp::MSPRos2PathPublisher path_publisher = msp::MSPRos2PathPublisher(this);
 
     rclcpp::Service<msp_msgs::srv::TrajectoryCheck>::SharedPtr msp_trajectory_check;
     msp::MSPRapidTrajectoryGenerator planner_ = msp::MSPRapidTrajectoryGenerator();

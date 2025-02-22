@@ -160,7 +160,7 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
                                       std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Response> response)
 {
-
+  //std::cout << "Checking trajectory" << std::endl;
   for (int i = 0; i < request->plan.count; i++)
   {
     auto item = msp::ros2::convert::fromTrajectoryPlanItemMessage(request->plan.segments[i]);
@@ -168,6 +168,7 @@ void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::Traje
     if (response->reply.status != msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION)
       break;
   }
+  path_publisher.publish();
 }
 
 uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
@@ -177,16 +178,16 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
   
   const FloatingPoint query_min_cell_width = 0.2f; // in meters
 
-  // std::cout << "Checking item: \n"
-  //           << item << std::endl;
+  //std::cout << "Checking item: \n" << item << std::endl;
   planner_.generate(&item);
-  const double time_slot = 1 / ( item.max_velocity * 10 );
-  for (double t = 0; t < item.estimated_time_s; t += time_slot)
+  const double time_slot = 1 / ( (item.max_velocity > 0 ? item.max_velocity : 2.0f) * 10 ); // note: max_velocity in some cases 0
+  for (double t = time_slot; t < item.estimated_time_s; t += time_slot)
   {
     planner_.getSetpointAt(t, s0);
 
     // Transform from ned to world
     const Point3D query_point(s0.pos.x, -s0.pos.y, -s0.pos.z);
+    path_publisher.push(query_point);
     if (auto *hashed_wavelet_octree =
             dynamic_cast<HashedWaveletOctree *>(occupancy_map_.get());
         hashed_wavelet_octree)
@@ -203,7 +204,6 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
       }
     }
   }
-
   return msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION;
 }
 
