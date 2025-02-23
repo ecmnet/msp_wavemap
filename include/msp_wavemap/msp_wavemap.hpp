@@ -103,6 +103,9 @@ namespace msp
     void onDepthReceived(const gz::msgs::Image &msg);
     void onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
                            std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Response> response);
+
+    template <typename MapT>
+      bool has_occupied_cells_in(MapT& map, const Point3D &ref,const float radius_m);
     uint8_t checkPlanItem(msp::PlanItem item);
 
     void publish_camera_transform()

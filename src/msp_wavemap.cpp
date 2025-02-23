@@ -160,7 +160,7 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
 void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
                                       std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Response> response)
 {
-  //std::cout << "Checking trajectory" << std::endl;
+  // std::cout << "Checking trajectory" << std::endl;
   for (int i = 0; i < request->plan.count; i++)
   {
     auto item = msp::ros2::convert::fromTrajectoryPlanItemMessage(request->plan.segments[i]);
@@ -175,12 +175,12 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
 {
 
   StateTriplet s0;
-  
+
   const FloatingPoint query_min_cell_width = 1.0f; // in meters
 
-  //std::cout << "Checking item: \n" << item << std::endl;
+  // std::cout << "Checking item: \n" << item << std::endl;
   planner_.generate(&item);
-  const double time_slot = 1 / ( (item.max_velocity > 0 ? item.max_velocity : 2.0f) * 10 ); // note: max_velocity in some cases 0
+  const double time_slot = 1 / ((item.max_velocity > 0 ? item.max_velocity : 2.0f) * 10); // note: max_velocity in some cases 0
   for (double t = time_slot; t < item.estimated_time_s; t += time_slot)
   {
     planner_.getSetpointAt(t, s0);
@@ -188,23 +188,54 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
     // Transform from ned to world
     const Point3D query_point(s0.pos.x, -s0.pos.y, -s0.pos.z);
     path_publisher.push(query_point);
+
     if (auto *hashed_wavelet_octree =
             dynamic_cast<HashedWaveletOctree *>(occupancy_map_.get());
         hashed_wavelet_octree)
     {
-      const FloatingPoint map_min_cell_width = hashed_wavelet_octree->getMinCellWidth();
-      const IndexElement query_height = convert::cellWidthToHeight(query_min_cell_width, 1.f / map_min_cell_width);
-      const OctreeIndex query_index = convert::pointToNodeIndex(query_point, map_min_cell_width, query_height);
-      const FloatingPoint occupancy_log_odds = hashed_wavelet_octree->getCellValue(query_index);
-      //std::cout << occupancy_log_odds << std::endl;
-      if (occupancy_log_odds > 0.5)
-      {
+
+      if(has_occupied_cells_in(hashed_wavelet_octree, query_point, 0.5f)) {
         std::cout << "Collision at " << s0.pos << std::endl;
         return msp_msgs::msg::TrajectoryCheckAck::STATUS_EMERGENCY_STOP;
       }
+    } else {
+      std::cout << "Map type not supported " << std::endl;
     }
   }
   return msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION;
+}
+
+template <typename MapT>
+bool MSWaveMapNode::has_occupied_cells_in(MapT &map, const Point3D &ref, float radius_m)
+{
+  const Point3D radius_vec{radius_m, radius_m, radius_m};
+  const Point3D lower_bound{ref - radius_vec};
+  const Point3D upper_bound{ref + radius_vec};
+
+  const wavemap::Point3D lower_bound_wavemap = lower_bound.cast<float>();
+  const wavemap::Point3D upper_bound_wavemap = upper_bound.cast<float>();
+
+  const wavemap::FloatingPoint min_cell_width =
+      map->getMinCellWidth();
+  const wavemap::Index3D min_corner_index =
+      wavemap::convert::pointToFloorIndex(lower_bound_wavemap, 1.f / min_cell_width);
+  const wavemap::Index3D max_corner_index =
+      wavemap::convert::pointToCeilIndex(upper_bound_wavemap, 1.f / min_cell_width);
+
+  wavemap::QueryAccelerator query_accelerator(*map);
+
+  for (const auto &query_index :
+       wavemap::Grid<3>(min_corner_index, max_corner_index))
+  {
+    const wavemap::FloatingPoint occupancy_log_odds =
+        query_accelerator.getCellValue(query_index);
+    const wavemap::FloatingPoint occupancy_probability =
+        wavemap::convert::logOddsToProbability(occupancy_log_odds);
+    if (occupancy_probability > 0.7)
+      return true;
+  }
+
+  return false;
 }
 
 int main(int argc, char *argv[])
