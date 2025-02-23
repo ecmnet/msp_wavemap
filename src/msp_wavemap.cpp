@@ -17,12 +17,12 @@
 
 #include <opencv2/core/eigen.hpp>
 #include <wavemap/pipeline/pipeline.h>
-#include <wavemap/core/utils/query/map_interpolator.h>
 #include <wavemap/core/utils/iterate/grid_iterator.h>
 
-#include <msp_msgs/msg/trajectory.hpp>
+// #include <msp_msgs/msg/trajectory.hpp>
 
 #include <msp_wavemap/lib/config/stream_conversions.h>
+#include <wavemap/core/utils/sdf/quasi_euclidean_sdf_generator.h>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <fstream>
@@ -161,6 +161,7 @@ void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::Traje
                                       std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Response> response)
 {
   // std::cout << "Checking trajectory" << std::endl;
+
   for (int i = 0; i < request->plan.count; i++)
   {
     auto item = msp::ros2::convert::fromTrajectoryPlanItemMessage(request->plan.segments[i]);
@@ -173,6 +174,15 @@ void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::Traje
 
 uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
 {
+  HashedWaveletOctree *hashed_wavelet_octree;
+
+  if (hashed_wavelet_octree =
+          dynamic_cast<HashedWaveletOctree *>(occupancy_map_.get());
+      !hashed_wavelet_octree)
+  {
+    std::cout << "Map type not supported " << std::endl;
+    return msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION;
+  }
 
   StateTriplet s0;
 
@@ -180,7 +190,7 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
 
   // std::cout << "Checking item: \n" << item << std::endl;
   planner_.generate(&item);
-  const double time_slot = 1 / ((item.max_velocity > 0 ? item.max_velocity : 2.0f) * 10); // note: max_velocity in some cases 0
+  const double time_slot = 1 / ((item.max_velocity > 0 ? item.max_velocity : 2.0f) * 5); // note: max_velocity in some cases 0
   for (double t = time_slot; t < item.estimated_time_s; t += time_slot)
   {
     planner_.getSetpointAt(t, s0);
@@ -189,17 +199,10 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
     const Point3D query_point(s0.pos.x, -s0.pos.y, -s0.pos.z);
     path_publisher.push(query_point);
 
-    if (auto *hashed_wavelet_octree =
-            dynamic_cast<HashedWaveletOctree *>(occupancy_map_.get());
-        hashed_wavelet_octree)
+    if (has_occupied_cells_in(hashed_wavelet_octree, query_point, 0.5f))
     {
-
-      if(has_occupied_cells_in(hashed_wavelet_octree, query_point, 0.5f)) {
-        std::cout << "Collision at " << s0.pos << std::endl;
-        return msp_msgs::msg::TrajectoryCheckAck::STATUS_EMERGENCY_STOP;
-      }
-    } else {
-      std::cout << "Map type not supported " << std::endl;
+      std::cout << "Collision expected at " << s0.pos << " in " << t << "s" << std::endl;
+      return msp_msgs::msg::TrajectoryCheckAck::STATUS_EMERGENCY_STOP;
     }
   }
   return msp_msgs::msg::TrajectoryCheckAck::STATUS_NO_COLLISION;
