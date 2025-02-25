@@ -42,7 +42,7 @@ namespace msp
         {
             _map = map;
             timer_ = _node->create_wall_timer(
-                std::chrono::milliseconds(50),
+                std::chrono::milliseconds(100),
                 std::bind(&MSPRos2GridPublisher::publish, this));
         }
 
@@ -96,7 +96,7 @@ namespace msp
 
             const Eigen::Vector3d reference(twc.getPosition().x(), twc.getPosition().y(), twc.getPosition().z());
 
-            const Eigen::Vector3d radius_vec{10.0f, 10.0f, 0.0f};
+            const Eigen::Vector3d radius_vec{10.0f, 10.0f, 0.1f};
             const Eigen::Vector3d lower_bound{reference - radius_vec};
             const Eigen::Vector3d upper_bound{reference + radius_vec};
 
@@ -123,7 +123,7 @@ namespace msp
                    
                     const BlockIndex block_index = convert::indexToBlockIndex(query_index, hashed_wavelet_octree->getTreeHeight());
                     const auto *b = hashed_wavelet_octree->getBlock(block_index);
-                    if (!b || b->getTimeSinceLastUpdated() > 0.1f)
+                    if (!b || b->getTimeSinceLastUpdated() > 0.2f)
                         continue;
              
                     const wavemap::FloatingPoint occupancy_log_odds = query_accelerator.getCellValue(query_index);
@@ -158,7 +158,7 @@ namespace msp
 
                     const BlockIndex block_index = convert::indexToBlockIndex(query_index, hashed_chunked_wavelet_octree->getTreeHeight());
                     const auto *b = hashed_chunked_wavelet_octree->getBlock(block_index);
-                    if (!b || b->getTimeSinceLastUpdated() > 0.1f)
+                    if (!b || b->getTimeSinceLastUpdated() > 0.2f)
                         continue;
                    
                     const wavemap::FloatingPoint occupancy_log_odds = query_accelerator.getCellValue(query_index);
