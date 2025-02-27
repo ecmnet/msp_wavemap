@@ -11,14 +11,17 @@ map:
   min_cell_width: { meters: 0.2 }
 
 map_operations:
-  - type: threshold_map
-    once_every: { seconds: 2.0 }
-  - type: prune_map
-    once_every: { seconds: 10.0 }
-  - type: crop_map
-    once_every: { seconds: 0.1 }
-    remove_blocks_beyond_distance: { meters: 15.0 }
-    only_when_moved: { meters: 0.3 }
+#  - type: threshold_map
+#    once_every: { seconds: 2.0 }
+#  - type: prune_map
+#    once_every: { seconds: 10.0 }
+#  - type: crop_map
+#    once_every: { seconds: 0.1 }
+#    remove_blocks_beyond_distance: { meters: 20.0 }
+#    only_when_moved: { meters: 0.3 }
+   - type: decay_map
+     once_every: { seconds: 0.1 }
+     decay_rate: { 0.7 }
 
 measurement_integrators:
   gazebo_short:

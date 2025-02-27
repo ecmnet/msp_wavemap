@@ -37,11 +37,6 @@ elseif ("$ENV{ROS_VERSION}" STREQUAL "2")
   # In this mode, introspection is available for the C++ lib and ROS2 interface
   # TODO(victorr): Populate this once the ROS2 interface is under construction
 
-  add_subdirectory(library/cpp)
-
-  # Usage examples
-  add_subdirectory(examples/cpp)
-
 else ()
   # Load in pure CMake mode
   # In this mode, introspection is available only for the C++ and python libs

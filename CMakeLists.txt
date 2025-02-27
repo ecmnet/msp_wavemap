@@ -7,14 +7,13 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic -Wno-address-of-packed-member -O3 -march=native )
+  add_compile_options(-Wall -Wextra -Wpedantic -Wno-address-of-packed-member -O3 -march=native  )
 endif()
 
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp wavemap)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider)
 
 include_directories(include ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/wavemap/library/cpp/include
                             ${CMAKE_CURRENT_SOURCE_DIR}/dependencies/waverider/waverider/include)
@@ -25,6 +24,7 @@ find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(msp_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(msp_controller REQUIRED)
 find_package(msp_offboard_controller REQUIRED)
 find_package(gz-transport13 REQUIRED)
@@ -39,21 +39,17 @@ find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 
-
-
 add_executable(${PROJECT_NAME}  src/msp_wavemap.cpp 
-                                src/msp_waverider.cpp
+                                lib/sdf/esdf_generator.cpp
                                 lib/config/yaml_cpp_conversions.cc
                                 lib/config/stream_conversions.cc
                                 lib/config/file_conversions.cc
-                               # lib/utils/tf_transformer.cc
                                 lib/map_operations/crop_map_operation.cc
                                 lib/map_operations/msp_map_operation_factory.cc
                                 
                               )
 include_directories(include dependencies/wavemap/library/cpp/include
-                            dependencies/waverider/waverider/include
-                            dependencies/rmpcpp/include
+                            
                             )
 
                                           
@@ -62,6 +58,7 @@ ament_target_dependencies(${PROJECT_NAME}
                    msp_offboard_controller
                    msp_msgs 
                    nav_msgs
+                   visualization_msgs
                    px4_msgs rclcpp 
                    tf2 tf2_ros 
                    gz-transport13 
@@ -78,7 +75,6 @@ ament_target_dependencies(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME} 
                       yaml-cpp 
                       Eigen3::Eigen
-                      waverider
                       wavemap::wavemap_core
                       wavemap::wavemap_io
                       wavemap::wavemap_pipeline

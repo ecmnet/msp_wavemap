@@ -40,14 +40,14 @@ namespace msp
 
             point_cloud_publisher_ = _node->create_publisher<sensor_msgs::msg::PointCloud2>("cloud", 1);
 
-            timer_ = _node->create_wall_timer(
-                    std::chrono::milliseconds(200),
-                    std::bind(&MSPRos2PCLPublisher::publish_point_cloud, this));
         }
 
         void setMap(wavemap::MapBase::Ptr map)
         {
             _map = map;
+            timer_ = _node->create_wall_timer(
+                std::chrono::milliseconds(200),
+                std::bind(&MSPRos2PCLPublisher::publish_point_cloud, this));
         }
 
     private:

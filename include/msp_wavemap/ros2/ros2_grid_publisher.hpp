@@ -18,8 +18,6 @@
 #include <algorithm>
 #include <memory>
 
-// TODO: Skip unchanged block as described in
-// https : // github.com/ethz-asl/wavemap/blob/main/interfaces/ros1/wavemap_ros/src/map_operations/publish_pointcloud_operation.cc
 
 using namespace wavemap;
 

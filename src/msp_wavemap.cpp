@@ -1,5 +1,6 @@
 
 #include <msp_wavemap/msp_wavemap.hpp>
+
 #include <opencv2/opencv.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <iostream>
@@ -11,6 +12,7 @@
 #include <wavemap/core/map/map_base.h>
 #include <wavemap/core/map/map_factory.h>
 #include <wavemap/pipeline/map_operations/map_operation_factory.h>
+
 #include <msp_wavemap/lib/map_operations/msp_map_operation_factory.h>
 
 #include <wavemap/core/utils/math/approximate_trigonometry.h>
@@ -19,10 +21,7 @@
 #include <wavemap/pipeline/pipeline.h>
 #include <wavemap/core/utils/iterate/grid_iterator.h>
 
-// #include <msp_msgs/msg/trajectory.hpp>
-
 #include <msp_wavemap/lib/config/stream_conversions.h>
-#include <wavemap/core/utils/sdf/quasi_euclidean_sdf_generator.h>
 
 #include <ament_index_cpp/get_package_share_directory.hpp>
 #include <fstream>
@@ -66,8 +65,8 @@ void MSWaveMapNode::initialize()
   CHECK_NOTNULL(occupancy_map_);
 
   // Setup thread pool
-  RCLCPP_INFO(this->get_logger(), "Creating thread pool with 5 threads.");
-  thread_pool_ = std::make_shared<ThreadPool>(5);
+  RCLCPP_INFO(this->get_logger(), "Creating thread pool with 6 threads.");
+  thread_pool_ = std::make_shared<ThreadPool>(6);
   CHECK_NOTNULL(thread_pool_);
 
   // Setup the pipeline
@@ -114,6 +113,8 @@ void MSWaveMapNode::initialize()
   pcl_publisher.setMap(occupancy_map_);
   msp_publisher.setMap(occupancy_map_);
 
+  esdf_generator_.setMap(occupancy_map_, thread_pool_);
+
   // Publish Camera Tranform
   publish_camera_transform();
 
@@ -147,14 +148,14 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
   auto t1 = std::chrono::high_resolution_clock::now();
 
   pipeline_->runPipeline({"gazebo_short", "gazebo_long"}, depth_image);
+
   auto t2 = std::chrono::high_resolution_clock::now();
-  // wave_rider_.updateMap(occupancy_map_);
+
+  esdf_generator_.generate(*T_W_C);
   auto t3 = std::chrono::high_resolution_clock::now();
 
-  // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
-  // std::cout << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() / 1000000 << "ms\n";
-  // const size_t map_size_KB = occupancy_map_->getMemoryUsage() / 1024;
-  // std::cout << "Created map of size: " << map_size_KB << " KB" << std::endl;
+  std::cout << "MAP:  " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
+  std::cout << "ESDF: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t3 - t2).count() / 1000000 << "ms\n";
 }
 
 void MSWaveMapNode::onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
@@ -199,7 +200,7 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
     const Point3D query_point(s0.pos.x, -s0.pos.y, -s0.pos.z);
     path_publisher.push(query_point);
 
-    if (has_occupied_cells_in(hashed_wavelet_octree, query_point, 0.5f))
+    if (has_occupied_cells_in(hashed_wavelet_octree, query_point, 0.4f))
     {
       std::cout << "Collision expected at " << s0.pos << " in " << t << "s" << std::endl;
       return msp_msgs::msg::TrajectoryCheckAck::STATUS_EMERGENCY_STOP;

@@ -24,14 +24,14 @@
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-#include <msp_wavemap/msp_waverider.hpp>
-
 #include <wavemap/core/config/config_base.h>
 #include <wavemap/core/indexing/index_hashes.h>
 #include <wavemap/core/integrator/integrator_base.h>
 #include <wavemap/core/map/map_base.h>
 #include <wavemap/core/utils/thread_pool.h>
 #include <wavemap/pipeline/pipeline.h>
+
+#include <msp_wavemap/msp_esdf_generator.hpp>
 
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/static_transform_broadcaster.h>
@@ -86,7 +86,7 @@ namespace msp
     int count;
     bool in_collision = false;
 
-    msp::MSPWaveRider wave_rider_ = msp::MSPWaveRider(this, "world", transformer_);
+    msp::MSPESDFGenerator esdf_generator_    = msp::MSPESDFGenerator(this, transformer_);
 
     msp::MSPRos2PCLPublisher  pcl_publisher  = msp::MSPRos2PCLPublisher(this, transformer_);
     msp::MSPRos2GridPublisher msp_publisher  = msp::MSPRos2GridPublisher(this, transformer_);
@@ -97,8 +97,6 @@ namespace msp
 
     std::shared_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     std::shared_ptr<tf2_ros::StaticTransformBroadcaster> static_broadcaster_;
-
-    // rclcpp::Publisher<msp_msgs::msg::Trajectory>::SharedPtr trajectory_publisher_;
 
     void onDepthReceived(const gz::msgs::Image &msg);
     void onTrajectoryCheck(const std::shared_ptr<msp_msgs::srv::TrajectoryCheck::Request> request,
