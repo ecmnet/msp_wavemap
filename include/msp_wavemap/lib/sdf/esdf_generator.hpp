@@ -7,8 +7,8 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-#include <queue>
-#include <mutex>  
+
+#define MAX_DISTANCE 99.0f
 
 using namespace wavemap;
 
@@ -23,22 +23,20 @@ namespace msp
                                : map_(map), dimensions_(dimensions), props_(dimensions, 0.2f), thread_pool_(thread_pool)
         {
             esdf_grid_.resize(props_.getSizeX() * props_.getSizeY() * props_.getSizeZ(), std::numeric_limits<float>::max());
-
-
         }
 
-     //   void generate_dijkstra(const Point3D &reference);
+        /*
+        * Generate a fixed 3D ESDF with size 10x10x5 
+        */
         void generate_fast_sweep(const Point3D &reference);
 
-        std::vector<float>* getData()
-        {
-            return &esdf_grid_;
-        }
+        /*
+        * Returns an ESDF gradiant at a certain pont in world coordinates
+        */
+        Eigen::Vector3f getESDFGradientAt(Point3D& p, Point3D& reference);
 
-        msp::ESDFProperties* getProperties()
-        {
-            return &props_;
-        }
+        std::vector<float>* getData() { return &esdf_grid_; }
+        msp::ESDFProperties* getProperties() { return &props_; }
 
 
     private:

@@ -58,6 +58,9 @@ namespace msp
             pcl::PointCloud<pcl::PointXYZ> pcl_cloud;
             std::vector<Point3D> list;
 
+            if(!_map || _map->empty())
+            return;
+
             // Define a functor that converts map leaf nodes into pointcloud points
             auto add_points_for_leaf_node =
                 [this, min_cell_width = _map->getMinCellWidth(),

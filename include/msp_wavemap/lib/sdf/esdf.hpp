@@ -36,6 +36,11 @@ class ESDFProperties {
         return  x + y * size_x + z * size_xy;
     }
 
+    Eigen::Vector3i world_to_index_tupel(const Point3D &world, const Point3D &reference) {
+        const Point3D diff = world - reference + offset;
+        return Eigen::Vector3i(uint32_t((diff.x() ) / cell_width_),uint32_t((diff.y() ) / cell_width_),uint32_t((diff.z() ) / cell_width_));
+    }
+
     Point3D index_to_World(uint32_t i, const Point3D &reference) {
         const float x = float(i          % size_x ) * cell_width_ ;
         const float y = float(i / size_x % size_y ) * cell_width_ ;

@@ -101,6 +101,9 @@ namespace msp
             const wavemap::Point3D lower_bound_wavemap = lower_bound.cast<float>();
             const wavemap::Point3D upper_bound_wavemap = upper_bound.cast<float>();
 
+            if(!_map || _map->empty())
+              return;
+
             if (const auto *hashed_wavelet_octree =
                     dynamic_cast<const HashedWaveletOctree *>(_map.get());
                 hashed_wavelet_octree)

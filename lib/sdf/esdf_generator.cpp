@@ -43,6 +43,21 @@ void ESDFGenerator::generate_fast_sweep(const Point3D &reference)
     }
 }
 
+Eigen::Vector3f ESDFGenerator::getESDFGradientAt(Point3D& p, Point3D& reference) {
+   
+    Eigen::Vector3i i = props_.world_to_index_tupel(p,reference);
+
+    i.x() = std::clamp(i.x(),1,int(props_.getSizeX())-2);
+    i.y() = std::clamp(i.y(),1,int(props_.getSizeY())-2);
+    i.z() = std::clamp(i.z(),1,int(props_.getSizeY())-2);
+    
+    float dx = (esdf_grid_[props_.index(i.x() + 1, i.y(), i.z())] - esdf_grid_[props_.index(i.x() - 1, i.y(), i.z())]) / 2.0f;
+    float dy = (esdf_grid_[props_.index(i.x(), i.y() + 1, i.z())] - esdf_grid_[props_.index(i.x(), i.y() - 1, i.z())]) / 2.0f;
+    float dz = (esdf_grid_[props_.index(i.x(), i.y(), i.z() + 1)] - esdf_grid_[props_.index(i.x(), i.y(), i.z() - 1)]) / 2.0f;
+
+    return Eigen::Vector3f(dx, dy, dz).normalized();
+}
+
 void ESDFGenerator::processESDFChunk(Eigen::Vector3i center, int dz, int dy, int dx)
 {
             for (int z = -center.z() + 1; z < center.z(); ++z)
