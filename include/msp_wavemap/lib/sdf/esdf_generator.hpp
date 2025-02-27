@@ -51,6 +51,8 @@ namespace msp
         MapBase::Ptr map_;
         Point3D dimensions_;
         std::vector<float> esdf_grid_;
+
+        void processESDFChunk(Eigen::Vector3i center, int dz, int dy, int dx);
         
         
         

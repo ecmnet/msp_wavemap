@@ -19,7 +19,7 @@ namespace msp
             grid_publisher_ = _node->create_publisher<visualization_msgs::msg::MarkerArray>("esdf", 100);
         }
 
-        void setMap(MapBase::Ptr map, std::shared_ptr<ThreadPool> thread_pool) {
+        void setMap(MapBase::Ptr map, std::shared_ptr<ThreadPool> thread_pool = nullptr) {
 
             std::cout << "Creating ESDF generator" << std::endl;
             esdf_generator = new ESDFGenerator(map, dimensions_, thread_pool);
@@ -98,7 +98,7 @@ namespace msp
             marker.color.r = std::min(3.0f * norm, 1.0f);
             marker.color.g = std::min(3.0f * norm - 1.0f, 1.0f);
             marker.color.b = std::min(3.0f * norm - 2.0f, 1.0f);
-            marker.color.a = 1.0f;
+            marker.color.a = 0.7f;
             marker.type = visualization_msgs::msg::Marker::CUBE; 
             marker.action = visualization_msgs::msg::Marker::MODIFY;
             return marker;

@@ -1,6 +1,6 @@
 
 #include <msp_wavemap/lib/sdf/esdf_generator.hpp>
-#include <omp.h> 
+#include <omp.h>
 
 #include <wavemap/core/common.h>
 #include <wavemap/core/utils/query/query_accelerator.h>
@@ -13,56 +13,59 @@ void ESDFGenerator::generate_fast_sweep(const Point3D &reference)
 
     auto occupied_cells = getOccupiedCells(reference);
 
-    if(occupied_cells.empty())
+    if (occupied_cells.empty())
         return;
 
     std::fill(esdf_grid_.begin(), esdf_grid_.end(), std::numeric_limits<float>::max());
 
-    // std::cout << occupied_cells.size() <<std::endl;
-
-    //prepare esd_grid_ with occupied cells
+    // prepare esd_grid_ with occupied cells
     for (const auto &cell : occupied_cells)
     {
         const auto index = props_.world_to_index(cell, reference);
         esdf_grid_[index] = -1.0f;
     }
 
-    const int centerX = props_.getSizeX() / 2;
-    const int centerY = props_.getSizeY() / 2;
-    const int centerZ = props_.getSizeZ() / 2;
+    const Eigen::Vector3i center(int(props_.getSizeX()) / 2, int(props_.getSizeY()) / 2, int(props_.getSizeZ()) / 2);
 
-    //  for (int sweep = 0; sweep < 6; ++sweep) // Why multiple passes original 6
-    //  { 
-        for (int dz : {-1, 1})
-        { // Sweep in Z direction
-            for (int dy : {-1, 1})
-            { // Sweep in Y direction
-                for (int dx : {-1, 1})
-                { // Sweep in X direction
-                    for (int z = -centerZ + 1; z < centerZ; ++z)
+    for (int dz : {-1, 1})
+    { // Sweep in Z direction
+        for (int dy : {-1, 1})
+        { // Sweep in Y direction
+            for (int dx : {-1, 1})
+            { // Sweep in X direction
+                if (thread_pool_)
+                    thread_pool_->add_task([this, center, dz, dy, dx](){ this->processESDFChunk(center, dz,dy,dx); });
+                else
+                    processESDFChunk(center, dz,dy,dx);
+            }
+            if (thread_pool_)
+                thread_pool_->wait_all();    
+        }
+    }
+}
+
+void ESDFGenerator::processESDFChunk(Eigen::Vector3i center, int dz, int dy, int dx)
+{
+            for (int z = -center.z() + 1; z < center.z(); ++z)
+            {
+                for (int y = -center.y() + 1; y < center.y(); ++y)
+                {
+                    for (int x = -center.x() + 1; x < center.x(); ++x)
                     {
-                        for (int y = -centerY + 1; y < centerY; ++y)
-                        {
-                            for (int x = -centerX + 1; x < centerX; ++x)
-                            {
 
-                                int gridX = x + centerX;
-                                int gridY = y + centerY;
-                                int gridZ = z + centerZ;
+                        const int gridX = x + center.x();
+                        const int gridY = y + center.y();
+                        const int gridZ = z + center.z();
 
-                                float minDist = esdf_grid_[props_.index(gridX, gridY, gridZ)];
-                                minDist = std::min(minDist, esdf_grid_[props_.index(gridX + dx, gridY, gridZ)] + 1.0f);
-                                minDist = std::min(minDist, esdf_grid_[props_.index(gridX, gridY + dy, gridZ)] + 1.0f);
-                                minDist = std::min(minDist, esdf_grid_[props_.index(gridX, gridY, gridZ + dz)] + 1.0f);
+                        float minDist = esdf_grid_[props_.index(gridX, gridY, gridZ)];
+                        minDist = std::min(minDist, esdf_grid_[props_.index(gridX + dx, gridY, gridZ)] + 1.0f);
+                        minDist = std::min(minDist, esdf_grid_[props_.index(gridX, gridY + dy, gridZ)] + 1.0f);
+                        minDist = std::min(minDist, esdf_grid_[props_.index(gridX, gridY, gridZ + dz)] + 1.0f);
 
-                                esdf_grid_[props_.index(gridX, gridY, gridZ)] = minDist;
-                            }
-                        }
+                        esdf_grid_[props_.index(gridX, gridY, gridZ)] = minDist;
                     }
                 }
             }
-        }
-    //   }
 }
 
 std::vector<Point3D> ESDFGenerator::getOccupiedCells(const Point3D &reference)
