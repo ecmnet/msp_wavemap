@@ -1,6 +1,5 @@
 
 #include <msp_wavemap/lib/sdf/esdf_generator.hpp>
-#include <omp.h>
 
 #include <wavemap/core/common.h>
 #include <wavemap/core/utils/query/query_accelerator.h>
@@ -52,7 +51,6 @@ void ESDFGenerator::processESDFChunk(Eigen::Vector3i center, int dz, int dy, int
                 {
                     for (int x = -center.x() + 1; x < center.x(); ++x)
                     {
-
                         const int gridX = x + center.x();
                         const int gridY = y + center.y();
                         const int gridZ = z + center.z();
