@@ -24,13 +24,11 @@ namespace msp
         void generate(const Transformation3D& T_W_C) {
 
             const Point3D reference = T_W_C.getPosition();
-
-            auto t1 = std::chrono::high_resolution_clock::now();
             esdf_generator_->generate_fast_sweep(reference);
-            auto t2 = std::chrono::high_resolution_clock::now();
-  
-            std::cout << "ESDF: " << std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count() / 1000000 << "ms\n";
         }
+
+        std::shared_ptr<msp::ESDF> get() { return esdf_generator_->getESDF(); }
+
 
     private:
 
@@ -41,7 +39,5 @@ namespace msp
         msp::ESDFGenerator* esdf_generator_;
 
         std::shared_ptr<TfTransformer> transformer_;
-
-       
     };
 }

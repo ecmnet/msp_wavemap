@@ -36,34 +36,34 @@ namespace msp
         void publish_esdf(Transformation3D twc)
         {
 
-            const auto esdf_data = esdf_->getData();
-            const auto esdf_prop = esdf_->getProperties();
+            const auto esdf = esdf_->getESDF();
+            const auto esdf_data = esdf->getData();
 
             if( esdf_data->empty())
               return;
               
             const Point3D reference(twc.getPosition().x(), twc.getPosition().y(), twc.getPosition().z());
-            const uint32_t offset = esdf_prop->getOffsetZ() * esdf_prop->getSizeY() * esdf_prop->getSizeX();
+            const uint32_t offset = esdf->getOffsetZ() * esdf->getSizeY() * esdf->getSizeX();
 
-            visualization_msgs::msg::MarkerArray esdf;
+            visualization_msgs::msg::MarkerArray esdf_marker_array;
             int count = 0;
 
-            for (uint32_t y = 0; y < esdf_prop->getSizeY(); y++)
+            for (uint32_t y = 0; y < esdf->getSizeY(); y++)
             {
-                for (uint32_t x = 0; x < esdf_prop->getSizeX(); x++)
+                for (uint32_t x = 0; x < esdf->getSizeX(); x++)
                 {
-                    uint32_t index = offset + y * esdf_prop->getSizeX() + x;
+                    uint32_t index = offset + y * esdf->getSizeX() + x;
                     const float v = esdf_data->at(index);
                     if (v > MAX_DISTANCE)
                         continue;
 
-                    const Point3D p = esdf_prop->index_to_World(index, reference);
+                    const Point3D p = esdf->index_to_World(index, reference);
                     //  std::cout << "ESDF: " << p.transpose() << " " << v << std::endl;
-                    esdf.markers.push_back(buildMarker(p, v, count++));
+                    esdf_marker_array.markers.push_back(buildMarker(p, v, count++));
                 }
             }
 
-            esdf_publisher_->publish(esdf);
+            esdf_publisher_->publish(esdf_marker_array);
         }
 
         visualization_msgs::msg::Marker buildMarker(Point3D position, float v, int i)

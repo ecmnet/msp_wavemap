@@ -110,13 +110,15 @@ void MSWaveMapNode::initialize()
     pipeline_->addIntegrator(integrator_name, integrator_params);
   }
 
-  pcl_publisher.setMap(occupancy_map_);
-  msp_publisher.setMap(occupancy_map_);
-
+  // Setup ESDF generator
   esdf_generator_.setMap(occupancy_map_, thread_pool_);
 
   // Publish Camera Tranform
   publish_camera_transform();
+
+  // Initialize publisher
+  pcl_publisher.setMap(occupancy_map_);
+  msp_publisher.setMap(occupancy_map_);
 
   RCLCPP_INFO(this->get_logger(), "MSP WaveMap Node started");
 }
@@ -145,12 +147,10 @@ void MSWaveMapNode::onDepthReceived(const gz::msgs::Image &msg)
   cv::cv2eigen<FloatingPoint>(floatImg, depth_image.getData());
   depth_image.setPose(*T_W_C);
 
+  // main processing
   auto t1 = std::chrono::high_resolution_clock::now();
-
   pipeline_->runPipeline({"gazebo_short", "gazebo_long"}, depth_image);
-
   auto t2 = std::chrono::high_resolution_clock::now();
-
   esdf_generator_.generate(*T_W_C);
   auto t3 = std::chrono::high_resolution_clock::now();
 
@@ -187,7 +187,7 @@ uint8_t MSWaveMapNode::checkPlanItem(msp::PlanItem item)
 
   StateTriplet s0;
 
-  const FloatingPoint query_min_cell_width = 1.0f; // in meters
+  //const FloatingPoint query_min_cell_width = 1.0f; // in meters
 
   // std::cout << "Checking item: \n" << item << std::endl;
   planner_.generate(&item);

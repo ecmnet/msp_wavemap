@@ -20,9 +20,8 @@ namespace msp
     public:
         explicit ESDFGenerator(MapBase::Ptr map, Point3D dimensions,
                                std::shared_ptr<ThreadPool> thread_pool  = nullptr) 
-                               : map_(map), dimensions_(dimensions), props_(dimensions, 0.2f), thread_pool_(thread_pool)
+                               : map_(map), dimensions_(dimensions), thread_pool_(thread_pool)
         {
-            esdf_grid_.resize(props_.getSizeX() * props_.getSizeY() * props_.getSizeZ(), std::numeric_limits<float>::max());
         }
 
         /*
@@ -33,10 +32,8 @@ namespace msp
         /*
         * Returns an ESDF gradiant at a certain pont in world coordinates
         */
-        Eigen::Vector3f getESDFGradientAt(Point3D& p, Point3D& reference);
 
-        std::vector<float>* getData() { return &esdf_grid_; }
-        msp::ESDFProperties* getProperties() { return &props_; }
+        std::shared_ptr<msp::ESDF>  getESDF() { return esdf_; }
 
 
     private:
@@ -44,11 +41,10 @@ namespace msp
         std::vector<Point3D> getOccupiedCells(const Point3D &ref);
         std::shared_ptr<ThreadPool> thread_pool_;
 
-        std::mutex esdf_mutex; 
-        msp::ESDFProperties props_;
+        std::shared_ptr<msp::ESDF> esdf_ = std::make_unique<msp::ESDF>(dimensions_,0.2f);
+
         MapBase::Ptr map_;
         Point3D dimensions_;
-        std::vector<float> esdf_grid_;
 
         void processESDFChunk(Eigen::Vector3i center, int dz, int dy, int dx);
         

@@ -7,11 +7,6 @@
 #include <msp_offboard_controller/segment_trajectory_generator/utils.h>
 
 #include <msp_msgs/srv/trajectory_check.hpp>
-// #include <px4_msgs/msg/vehicle_attitude.hpp>
-// #include <px4_msgs/msg/vehicle_local_position.hpp>
-// #include <px4_msgs/msg/vehicle_status.hpp>
-// #include <px4_msgs/msg/obstacle_distance.hpp>
-// #include <msp_msgs/msg/trajectory.hpp>
 
 #include <msp_wavemap/ros2/ros2_pcl_publisher.hpp>
 #include <msp_wavemap/ros2/ros2_grid_publisher.hpp>
@@ -32,6 +27,7 @@
 #include <wavemap/pipeline/pipeline.h>
 
 #include <msp_wavemap/msp_esdf_generator.hpp>
+#include <msp_wavemap/lib/rrt/rrt_plan_generator.hpp>
 
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2_ros/static_transform_broadcaster.h>
@@ -87,6 +83,7 @@ namespace msp
     bool in_collision = false;
 
     msp::MSPESDFGenerator esdf_generator_    = msp::MSPESDFGenerator(this, transformer_);
+    msp::RRTPlanGenerator rrt_planner_       = msp::RRTPlanGenerator(esdf_generator_.get());
 
     msp::MSPRos2PCLPublisher  pcl_publisher  = msp::MSPRos2PCLPublisher(this, transformer_);
     msp::MSPRos2GridPublisher msp_publisher  = msp::MSPRos2GridPublisher(this, transformer_);

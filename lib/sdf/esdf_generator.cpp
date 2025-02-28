@@ -15,16 +15,18 @@ void ESDFGenerator::generate_fast_sweep(const Point3D &reference)
     if (occupied_cells.empty())
         return;
 
-    std::fill(esdf_grid_.begin(), esdf_grid_.end(), std::numeric_limits<float>::max());
+    auto esdf_grid_ = esdf_->getData();
+
+    std::fill(esdf_grid_->begin(), esdf_grid_->end(), std::numeric_limits<float>::max());
 
     // prepare esd_grid_ with occupied cells
     for (const auto &cell : occupied_cells)
     {
-        const auto index = props_.world_to_index(cell, reference);
-        esdf_grid_[index] = -1.0f;
+        const auto index = esdf_->world_to_index(cell, reference);
+        (*esdf_grid_)[index] = -1.0f;
     }
 
-    const Eigen::Vector3i center(int(props_.getSizeX()) / 2, int(props_.getSizeY()) / 2, int(props_.getSizeZ()) / 2);
+    const Eigen::Vector3i center(int(esdf_->getSizeX()) / 2, int(esdf_->getSizeY()) / 2, int(esdf_->getSizeZ()) / 2);
 
     for (int dz : {-1, 1})
     { // Sweep in Z direction
@@ -43,23 +45,10 @@ void ESDFGenerator::generate_fast_sweep(const Point3D &reference)
     }
 }
 
-Eigen::Vector3f ESDFGenerator::getESDFGradientAt(Point3D& p, Point3D& reference) {
-   
-    Eigen::Vector3i i = props_.world_to_index_tupel(p,reference);
-
-    i.x() = std::clamp(i.x(),1,int(props_.getSizeX())-2);
-    i.y() = std::clamp(i.y(),1,int(props_.getSizeY())-2);
-    i.z() = std::clamp(i.z(),1,int(props_.getSizeY())-2);
-    
-    float dx = (esdf_grid_[props_.index(i.x() + 1, i.y(), i.z())] - esdf_grid_[props_.index(i.x() - 1, i.y(), i.z())]) / 2.0f;
-    float dy = (esdf_grid_[props_.index(i.x(), i.y() + 1, i.z())] - esdf_grid_[props_.index(i.x(), i.y() - 1, i.z())]) / 2.0f;
-    float dz = (esdf_grid_[props_.index(i.x(), i.y(), i.z() + 1)] - esdf_grid_[props_.index(i.x(), i.y(), i.z() - 1)]) / 2.0f;
-
-    return Eigen::Vector3f(dx, dy, dz).normalized();
-}
 
 void ESDFGenerator::processESDFChunk(Eigen::Vector3i center, int dz, int dy, int dx)
 {
+            auto esdf_grid_ = esdf_->getData();
             for (int z = -center.z() + 1; z < center.z(); ++z)
             {
                 for (int y = -center.y() + 1; y < center.y(); ++y)
@@ -70,12 +59,12 @@ void ESDFGenerator::processESDFChunk(Eigen::Vector3i center, int dz, int dy, int
                         const int gridY = y + center.y();
                         const int gridZ = z + center.z();
 
-                        float minDist = esdf_grid_[props_.index(gridX, gridY, gridZ)];
-                        minDist = std::min(minDist, esdf_grid_[props_.index(gridX + dx, gridY, gridZ)] + 1.0f);
-                        minDist = std::min(minDist, esdf_grid_[props_.index(gridX, gridY + dy, gridZ)] + 1.0f);
-                        minDist = std::min(minDist, esdf_grid_[props_.index(gridX, gridY, gridZ + dz)] + 1.0f);
+                        float minDist = (*esdf_grid_)[esdf_->index(gridX, gridY, gridZ)];
+                        minDist = std::min(minDist, (*esdf_grid_)[esdf_->index(gridX + dx, gridY, gridZ)] + 1.0f);
+                        minDist = std::min(minDist, (*esdf_grid_)[esdf_->index(gridX, gridY + dy, gridZ)] + 1.0f);
+                        minDist = std::min(minDist, (*esdf_grid_)[esdf_->index(gridX, gridY, gridZ + dz)] + 1.0f);
 
-                        esdf_grid_[props_.index(gridX, gridY, gridZ)] = minDist;
+                        (*esdf_grid_)[esdf_->index(gridX, gridY, gridZ)] = minDist;
                     }
                 }
             }
